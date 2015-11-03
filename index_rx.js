@@ -1,48 +1,15 @@
 import React from 'react';
 import ReactDom from 'react-dom';
-import {Observable,Subject} from 'rx';
+import {Observable} from 'rx';
 import {assign} from 'lodash';
+import {RxConnector, connect} from './reax';
 
-const { Component, PropTypes, Children } = React;
-
-class RxConnector extends Component {
-  
-  constructor(props) {
-    super(props);
-    this.source = new Subject();
-    var stateSource = props.actionSourceConnector(this.source);
-    stateSource.take(1).subscribe(s => this.state = s);
-    stateSource.subscribe(s => this.setState(s));
-  }
-
-  getChildContext() {
-    return { 
-      dispatch: (msg) => this.source.onNext(msg),
-      globalState: () => this.state
-    }
-  }
-
-  render() {
-    return React.createElement("div",{}, this.props.children);
-  }
-}
-
-RxConnector.propTypes = {
-  actionSourceConnector: PropTypes.func.isRequired
-};
-
-RxConnector.childContextTypes = {
-  dispatch: PropTypes.func.isRequired,
-  globalState: PropTypes.func.isRequired
-}; 
+const { Component, PropTypes, Children } = React; 
 
 class HelloWorld extends Component {
   render() {
-    return (<p>Hello from App! - {this.context.globalState().count}</p>);
+    return (<p>Hello from App! - {this.props.count}</p>);
   }
-}
-HelloWorld.contextTypes = {
-  globalState: PropTypes.func.isRequired
 }
 
 class Button extends Component {
@@ -54,30 +21,29 @@ class Button extends Component {
   }
 
   handleClick(e) {
-    this.context.dispatch({ type: this.props.id });
+    this.props.dispatch({ type: this.props.id });
   }
-}
-Button.contextTypes = {
-  dispatch: PropTypes.func.isRequired
 }
 
 global.App = {
   init(renderTarget) {
 
-    var state = {count: 0},
-        stateSource = new Subject();
+    var state = {count: 0};
 
     function connectToActionSource(actionSource) {
-      return Observable.concat(Observable.return(state),
+      return Observable.concat(
+        Observable.return(state),
         actionSource
-        .filter(m => m.type == "sproink")
-        .select(()=> assign(state, {count: state.count + 1})));
+          .filter(m => m.type == "sproink")
+          .select(()=> assign(state, {count: state.count + 1})));
     }
 
     ReactDom.render(
       <RxConnector actionSourceConnector={ connectToActionSource }>
-        <Button id="sproink" label="Cause a Hubbub" />
-        <HelloWorld count={state.count} />
+        {[
+          React.createElement(connect(Button), {id: "sproink", label: "Cause a hubbub"}, null),
+          React.createElement(connect(HelloWorld, s => { return { count: s.count} }), {}, null)
+        ]}
       </RxConnector>, renderTarget);
   }
 }
