@@ -1,5 +1,5 @@
 import React from 'react';
-import {Subject} from 'rx';
+import {Subject,Observable} from 'rx';
 import {assign} from 'lodash';
 const { Component, PropTypes, Children } = React;
 
@@ -66,4 +66,12 @@ export function connect(ReactComponent, stateSelector = s => {}) {
   }
 
   return Wrapper;
+}
+
+export class WorldPipe {
+  constructor(initialState = {}) {
+    this.stateObservable = Observable.create(observer => {
+      this.stateObserver = observer;
+    });
+  }
 }

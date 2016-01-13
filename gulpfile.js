@@ -44,7 +44,9 @@ function browserifyWatch(input, output){
 
 function bundleShare(b, output) {
   return b
-    .transform(babelify)
+    .transform(babelify.configure({
+      presets: ["es2015", "react"]
+    }))
     .bundle()
     .pipe(source(output))
     .pipe(gulp.dest('./wwwroot/assets'));
