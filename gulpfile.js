@@ -26,6 +26,7 @@ gulp.task('redux', function() {
   ); 
 });
 
+
 function browserifyWatch(input, output){
   // you need to pass these three config option to browserify
   var b = browserify({

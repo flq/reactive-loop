@@ -1,26 +1,11 @@
 import * as Rx from 'rx';
-import {assert} from 'chai';
+import {assign, map, each} from 'lodash';
 
-describe('obs tests', ()=> {
-  it('have a way to feed back state', ()=> {
-    var {dispatchAction, actionObservable} = actionSource();
-    var count = 0;
-    actionObservable.subscribe((t) => count++);
-    dispatchAction('foo');
-    assert.equal(count, 1);
-  });
-  it('can be combined', (cb)=> {
-
-    function appFunc(state, item) {
-      console.log("I am called");
-      return Promise.resolve({ count: state.count + item.payload});
-    }
-
-    var initialState = {count: 0 };
-    var {dispatchAction, actionObservable} = actionSource();
-    var {dispatchState, getCurrentState, stateObservable} = stateSource(initialState);
-
-    var zippedObs = Rx.Observable
+export default function appFuncInit(appFunc, initialState = {}) {
+  const { dispatchState, getCurrentState, stateObservable } = stateSource(initialState);
+  const { dispatchAction, actionObservable } = actionSource();
+  
+   var zippedObs = Rx.Observable
     .zip(
       actionObservable, 
       stateObservable, 
@@ -29,17 +14,12 @@ describe('obs tests', ()=> {
     .do(newState => dispatchState(newState));
 
     zippedObs.subscribe((t) => { /* not important */ });
-    dispatchAction({ payload: 3 });
-    setTimeout(()=> {
-      assert.equal(getCurrentState().count, 3);
-      cb();
-    }, 200);
-    
-    //dispatchAction({ payload: 4 });
-    //assert.equal(getCurrentState().count, 7);
-  });
-
-});
+  return {
+    getCurrentState,
+    stateObservable,
+    dispatchAction
+  };
+}
 
 function stateSource(currentState) {
   
@@ -74,4 +54,3 @@ function actionSource() {
     actionObservable 
   };
 }
-
