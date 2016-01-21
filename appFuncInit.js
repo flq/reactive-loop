@@ -2,58 +2,40 @@ import * as Rx from 'rx';
 import {assign, map, each} from 'lodash';
 
 export default function appFuncInit(appFuncs, initialState = {}) {
-  const { dispatchState, getCurrentState, stateObservable } = stateSource(initialState);
+  
   const { dispatchAction, actionObservable } = actionSource();
+  const stateObservable = new Rx.Subject();
+  let currentState = initialState;
+  stateObservable.subscribe(s => currentState = s);
   
   var allNewStates = map(appFuncs, (appFunc) => {
-    var filtered = actionObservable.filter(f => f.type == appFunc.type);
     
-    return Rx.Observable.zip(
-      stateObservable,
-      filtered,
-      (state, action) => { return { state, action } })
-    .map(({ state, action}) => appFunc.func(state, action))
+    return actionObservable
+      .filter(f => f.type == appFunc.type)
+      .withLatestFrom(stateObservable, (action, state) => { return { state, action } })
+      .map(({ state, action}) => appFunc.func(state, action))
+      //flatMap for observables and promises
   });
   
-  Rx.Observable.merge(allNewStates).subscribe((state)=>dispatchState(state));
+  Rx.Observable.merge(allNewStates)
+  .subscribe((state)=>stateObservable.onNext(state));
   
+  // We need to push the first state on the line
+  stateObservable.onNext(initialState);
+
   return {
-    getCurrentState,
+    getCurrentState() { return currentState; },
     stateObservable,
     dispatchAction
   };
 }
 
-function stateSource(currentState) {
-  
-  var dispatch = undefined;
-  var stateObservable = Rx.Observable.create(function(o) {
-    o.onNext(currentState);
-    dispatch = (nextState) => {
-      o.onNext(nextState);
-      currentState = nextState;
-    }
-  });
+function actionSource() { 
 
-  return {
-    dispatchState(newState) {
-      dispatch(newState);
-    },
-    getCurrentState() {
-      return currentState;
-    },
-    stateObservable
-  };
-}
-
-function actionSource() {
-  var dispatch = undefined;
-  var actionObservable = Rx.Observable.create(function(o) {
-    dispatch = (item) => o.onNext(item);
-  });
+  var actionObservable = new Rx.Subject();
 
   return { 
-    dispatchAction(action) { dispatch(action) }, 
+    dispatchAction(action) { actionObservable.onNext(action) }, 
     actionObservable 
   };
 }
