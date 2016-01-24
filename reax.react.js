@@ -1,25 +1,28 @@
 import React from 'react';
+const { Component, PropTypes, Children } = React;
 import {Subject,Observable} from 'rx';
 import {assign} from 'lodash';
-const { Component, PropTypes, Children } = React;
+import {appInit} from './reax.app';
 
-export class RxConnector extends Component {
+export class ReaxConnector extends Component {
   
   constructor(props) {
     super(props);
-    this.source = new Subject();
-    this.stateSource = props.actionSourceConnector(this.source);
-    this.state = {};
+    const { dispatchAction, getCurrentState, stateObservable } = appInit(props.app);
+    
+    this.getCurrentState = getCurrentState;
+    this.stateObservable = stateObservable;
+    this.dispatchAction = dispatchAction;
   }
 
   componentWillMount() {
-    this.stateSource.subscribe(s => this.setState(s));
+    this.stateObservable.subscribe(s => this.setState(s));
   }
 
   getChildContext() {
     return { 
-      dispatch: (msg) => this.source.onNext(msg),
-      state: () => this.state
+      dispatch: (msg) => this.dispatchAction(msg),
+      state: () => this.getCurrentState()
     }
   }
 
@@ -28,11 +31,11 @@ export class RxConnector extends Component {
   }
 }
 
-RxConnector.propTypes = {
-  actionSourceConnector: PropTypes.func.isRequired
+ReaxConnector.propTypes = {
+  app: PropTypes.object.isRequired
 };
 
-RxConnector.childContextTypes = {
+ReaxConnector.childContextTypes = {
   dispatch: PropTypes.func.isRequired,
   state: PropTypes.func.isRequired
 };

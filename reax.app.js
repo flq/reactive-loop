@@ -5,6 +5,7 @@ import {assign, map, each} from 'lodash';
 export function appBuilder() {
   const appFuncs = [];
   const actionObservables = [];
+  let initialState = {};
   const builder = {
     addAppFunc(type, func) {
       appFuncs.push({ type, func });
@@ -14,18 +15,22 @@ export function appBuilder() {
       actionObservables.push(actionObservable);
       return builder;
     },
+    setInitialState(state) {
+      initialState = state;
+      return builder;
+    },
     build() {
-      return {appFuncs, actionObservables};
+      return {appFuncs, actionObservables, initialState};
     }
   };
   return builder;
 }
 
-export function appInit(app, initialState = {}) {
+export function appInit(app) {
   
   const { dispatchAction, actionObservable } = actionSource();
   const stateObservable = new Subject();
-  let currentState = initialState;
+  let currentState = app.initialState;
   stateObservable.subscribe(s => currentState = s);
   
   var allNewStates = map(app.appFuncs, (appFunc) => {
@@ -42,7 +47,7 @@ export function appInit(app, initialState = {}) {
     .subscribe((state)=>stateObservable.onNext(state));
   
   // We need to push the first state on the line
-  stateObservable.onNext(initialState);
+  stateObservable.onNext(app.initialState);
 
   each(app.actionObservables, o => o.subscribe(msg => dispatchAction(msg)));
 

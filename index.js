@@ -2,15 +2,12 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import {Observable} from 'rx';
 import {assign} from 'lodash';
-import {RxConnector, connect} from './reax.react';
+import {ReaxConnector, connect} from './reax.react';
+import {appBuilder} from './reax.app';
 
 const { Component, PropTypes, Children } = React; 
 
-class HelloWorld extends Component {
-  render() {
-    return (<p>Hello from App! - {this.props.count}</p>);
-  }
-}
+const HelloWorld = ({count}) => (<p>Hello from App! - {count}</p>);
 
 class Button extends Component {
   render() {
@@ -28,22 +25,17 @@ class Button extends Component {
 global.App = {
   init(renderTarget) {
 
-    var state = {count: 0};
-
-    function connectToActionSource(actionSource) {
-      return Observable.concat(
-        Observable.return(state),
-        actionSource
-          .filter(m => m.type == "sproink")
-          .select(()=> assign(state, {count: state.count + 1})));
-    }
+    const app = appBuilder()
+      .addAppFunc('sproink', (s, a) => { return { count: s.count + 1 } })
+      .setInitialState({count: 0})
+      .build();
 
     ReactDom.render(
-      <RxConnector actionSourceConnector={ connectToActionSource }>
+      <ReaxConnector app={ app }>
         {[
           React.createElement(connect(Button), {id: "sproink", label: "Cause a hubbub"}, null),
           React.createElement(connect(HelloWorld, s => { return { count: s.count} }), {}, null)
         ]}
-      </RxConnector>, renderTarget);
+      </ReaxConnector>, renderTarget);
   }
 }
