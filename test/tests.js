@@ -1,7 +1,8 @@
 import {appInit,appBuilder} from '../reax.app';
 import {assert} from 'chai';
+import {Observable} from 'rx';
 
-describe('appFuncInit', ()=> {
+describe('appInit', ()=> {
   it('supports simple appFunc', ()=> {
     
     const app = appBuilder()
@@ -29,6 +30,16 @@ describe('appFuncInit', ()=> {
     assert.equal(getCurrentState().count, 4);
     dispatchAction({ type: 'foo' });
     assert.equal(getCurrentState().count, 5);
+  });
+
+  it('supports action sources', ()=> {
+    const app = appBuilder()
+      .addAppFunc('foo', (s, item) => { return { count: s.count + 1 } })
+      .addActionSource(Observable.return({ type:'foo' }))
+      .build();
+
+    let {dispatchAction,getCurrentState} = appInit(app, { count: 0 });
+    assert.equal(getCurrentState().count, 1);
   });
 
 });
