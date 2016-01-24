@@ -1,7 +1,22 @@
 import * as Rx from 'rx';
 import {assign, map, each} from 'lodash';
 
-export default function appInit(app, initialState = {}) {
+
+export function appBuilder() {
+  const appFuncs = [];
+  const builder = {
+    addAppFunc(type, func) {
+      appFuncs.push({ type, func });
+      return builder;
+    },
+    build() {
+      return appFuncs;
+    }
+  };
+  return builder;
+}
+
+export function appInit(app, initialState = {}) {
   
   const { dispatchAction, actionObservable } = actionSource();
   const stateObservable = new Rx.Subject();

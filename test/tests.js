@@ -1,12 +1,14 @@
-import appFuncInit from '../reax.app';
+import {appInit,appBuilder} from '../reax.app';
 import {assert} from 'chai';
 
 describe('appFuncInit', ()=> {
   it('supports simple appFunc', ()=> {
     
-    let {dispatchAction,getCurrentState} = appFuncInit(
-      [{ type: 'foo', func: (s, item) => { return { count: s.count + 1 } } }], 
-      { count: 0 });
+    const app = appBuilder()
+      .addAppFunc('foo', (s, item) => { return { count: s.count + 1 } })
+      .build();
+
+    let {dispatchAction,getCurrentState} = appInit(app, { count: 0 });
     
     dispatchAction({ type: 'foo' });
     assert.equal(getCurrentState().count, 1);
@@ -14,18 +16,12 @@ describe('appFuncInit', ()=> {
 
   it('supports two appFuncs', ()=> {
     
-    let {dispatchAction,getCurrentState} = appFuncInit(
-      [
-        { 
-          type: 'foo', 
-          func: (s, item) => { return { count: s.count + 1 } } 
-        },
-        { 
-          type: 'bar', 
-          func: (s, item) => { return { count: s.count + 3 } } 
-        }
-      ], 
-      { count: 0 });
+    const app = appBuilder()
+      .addAppFunc('foo', (s, item) => { return { count: s.count + 1 } })
+      .addAppFunc('bar', (s, item) => { return { count: s.count + 3 } })
+      .build();
+
+    let {dispatchAction,getCurrentState} = appInit(app, { count: 0 });
     
     dispatchAction({ type: 'foo' });
     assert.equal(getCurrentState().count, 1);
