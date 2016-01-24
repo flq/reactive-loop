@@ -4,28 +4,16 @@ var babelify = require('babelify');
 var source = require('vinyl-source-stream');
 var watchify = require('watchify');
 
-gulp.task('w_redux', function(){
-  return browserifyWatch('index_redux.js', 'app_redux.js');
+gulp.task('watch', function(){
+  return browserifyWatch('index.js', 'app.js');
 });
 
-gulp.task('w_rx', function(){
-  return browserifyWatch('index_rx.js', 'app_rx.js');
-});
-
-gulp.task('rx', function() {
+gulp.task('default', function() {
   return bundleShare(
-    browserify({ entries: ['index_rx.js'] }),
-    'app_rx.js'
+    browserify({ entries: ['index.js'] }),
+    'app.js'
   );
 });
-
-gulp.task('redux', function() {
-  return bundleShare(
-    browserify({ entries: ['index_redux.js'] }),
-    'app_redux.js'
-  ); 
-});
-
 
 function browserifyWatch(input, output){
   // you need to pass these three config option to browserify

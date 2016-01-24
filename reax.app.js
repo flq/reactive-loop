@@ -1,14 +1,14 @@
 import * as Rx from 'rx';
 import {assign, map, each} from 'lodash';
 
-export default function appFuncInit(appFuncs, initialState = {}) {
+export default function appInit(app, initialState = {}) {
   
   const { dispatchAction, actionObservable } = actionSource();
   const stateObservable = new Rx.Subject();
   let currentState = initialState;
   stateObservable.subscribe(s => currentState = s);
   
-  var allNewStates = map(appFuncs, (appFunc) => {
+  var allNewStates = map(app, (appFunc) => {
     
     return actionObservable
       .filter(f => f.type == appFunc.type)

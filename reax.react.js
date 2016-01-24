@@ -67,11 +67,3 @@ export function connect(ReactComponent, stateSelector = s => {}) {
 
   return Wrapper;
 }
-
-export class WorldPipe {
-  constructor(initialState = {}) {
-    this.stateObservable = Observable.create(observer => {
-      this.stateObserver = observer;
-    });
-  }
-}

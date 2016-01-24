@@ -1,4 +1,4 @@
-import appFuncInit from '../appFuncInit';
+import appFuncInit from '../reax.app';
 import {assert} from 'chai';
 
 describe('appFuncInit', ()=> {
