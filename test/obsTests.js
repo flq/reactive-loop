@@ -29,14 +29,12 @@ describe('obs tests', ()=> {
     .do(newState => dispatchState(newState));
 
     zippedObs.subscribe((t) => { /* not important */ });
-    dispatchAction({ payload: 3 });
-    setTimeout(()=> {
-      assert.equal(getCurrentState().count, 3);
+    stateObservable.skip(1).subscribe(s => {
+      assert.equal(s.count, 3);
       cb();
-    }, 150);
+    });
+    dispatchAction({ payload: 3 });
     
-    //dispatchAction({ payload: 4 });
-    //assert.equal(getCurrentState().count, 7);
   });
 
 });
