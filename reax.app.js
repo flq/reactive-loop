@@ -1,5 +1,5 @@
 import {Observable,Subject} from 'rx';
-import {concat, map, each} from 'lodash';
+import {concat, map, each, isString, isFunction} from 'lodash';
 
 
 export function appBuilder() {
@@ -8,12 +8,12 @@ export function appBuilder() {
   const actionObservables = [];
   let initialState = {};
   const builder = {
-    addAppFunc(type, func) {
-      appFuncs.push({ type, func });
+    addAppFunc(selector, func) {
+      appFuncs.push({ selector, func });
       return builder;
     },
-    addAsyncAppFunc(type, async) {
-      asyncAppFuncs.push({ type, async });
+    addAsyncAppFunc(selector, async) {
+      asyncAppFuncs.push({ selector, async });
       return builder;
     },
     addActionSource(actionObservable) {
@@ -40,13 +40,14 @@ export function appInit(app) {
   
   var allSyncStates = map(app.appFuncs, (appFunc) => {
     return actionObservable
-      .filter(f => f.type == appFunc.type)
+      .filter(createAppFuncFilter(appFunc.selector))
       .withLatestFrom(stateObservable, (action, state) => { return { state, action } })
       .map(wrapFuncWithErrorDispatch(appFunc.func, dispatchAction));
   });
+  
   var allAsyncStates = map(app.asyncAppFuncs, (appFunc) => {
     return actionObservable
-      .filter(f => f.type == appFunc.type)
+      .filter(createAppFuncFilter(appFunc.selector))
       .withLatestFrom(stateObservable, (action, state) => { return { state, action } })
       .map(({state,action}) => appFunc
         .async(state,action)
@@ -55,9 +56,7 @@ export function appInit(app) {
           return state;
         }))
       .mergeAll();
-  });
-  
-  
+  }); 
 
   Observable
     .merge(allSyncStates.concat(allAsyncStates))
@@ -70,7 +69,6 @@ export function appInit(app) {
  
   each(app.actionObservables, o => o.subscribe(msg => dispatchAction(msg)));
 
- 
   return {
     getCurrentState() { return currentState; },
     stateObservable,
@@ -92,11 +90,17 @@ function wrapFuncWithErrorDispatch(appFunc, dispatchAction) {
 }
 
 function actionSource() { 
-
   var actionObservable = new Subject();
-
   return { 
     dispatchAction(action) { actionObservable.onNext(action) }, 
     actionObservable 
   };
+}
+
+function createAppFuncFilter(selector) {
+  if (isString(selector))
+    return (f => f.type == selector);
+  if (isFunction(selector))
+    return selector;
+  return (f => false); // This handler will never match with any action
 }

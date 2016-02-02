@@ -59,6 +59,21 @@ describe('appInit sync', ()=> {
     dispatchAction({ type: 'foo' });
   });
 
+  it('supports a func selector', ()=> {
+    const app = appBuilder()
+      .addAppFunc(
+        a => a.type.startsWith('f'), 
+        (s,item) => ({ count: s.count + 1 }))
+      .setInitialState({ count: 0 })
+      .build();
+    
+    let {dispatchAction,getCurrentState} = appInit(app);
+    dispatchAction({type: 'ar'});
+    dispatchAction({type: 'foo'});
+    dispatchAction({type: 'fa'});
+    assert.equal(getCurrentState().count, 2);
+  });
+
 });
 
 describe('appInit with exceptions', ()=> {
