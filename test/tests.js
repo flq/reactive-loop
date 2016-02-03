@@ -2,11 +2,11 @@ import {appInit,appBuilder} from '../reax.app';
 import {assert} from 'chai';
 import {Observable} from 'rx';
 
-describe('appInit sync', ()=> {
-  it('supports simple appFunc', ()=> {
+describe('appInit supports', ()=> {
+  it('simple appFunc', ()=> {
     
     const app = appBuilder()
-      .addAppFunc('foo', (s, item) => { return { count: s.count + 1 } })
+      .addAppFunc('foo', (state, item) => { return { count: state().count + 1 } })
       .setInitialState({ count: 0 })
       .build();
 
@@ -16,11 +16,11 @@ describe('appInit sync', ()=> {
     assert.equal(getCurrentState().count, 1);
   });
 
-  it('supports two appFuncs', ()=> {
+  it('two appFuncs', ()=> {
     
     const app = appBuilder()
-      .addAppFunc('foo', (s, item) => { return { count: s.count + 1 } })
-      .addAppFunc('bar', (s, item) => { return { count: s.count + 3 } })
+      .addAppFunc('foo', (state, item) => { return { count: state().count + 1 } })
+      .addAppFunc('bar', (state, item) => { return { count: state().count + 3 } })
       .setInitialState({ count: 0 })
       .build();
 
@@ -34,9 +34,9 @@ describe('appInit sync', ()=> {
     assert.equal(getCurrentState().count, 5);
   });
 
-  it('supports action sources', ()=> {
+  it('action sources', ()=> {
     const app = appBuilder()
-      .addAppFunc('foo', (s, item) => { return { count: s.count + 1 } })
+      .addAppFunc('foo', (state, item) => { return { count: state().count + 1 } })
       .addActionSource(Observable.return({ type:'foo' }))
       .setInitialState({ count: 0 })
       .build();
@@ -45,9 +45,9 @@ describe('appInit sync', ()=> {
     assert.equal(getCurrentState().count, 1);
   });
 
-  it('supports async app funcs', (cb)=> {
+  it('async app funcs', (cb)=> {
     const app = appBuilder()
-      .addAsyncAppFunc('foo', (s,item) => Promise.resolve({ count: s.count + 1 }))
+      .addAsyncAppFunc('foo', (state,item) => Promise.resolve({ count: state().count + 1 }))
       .setInitialState({ count: 0 })
       .build();
     let {dispatchAction,stateObservable} = appInit(app);
@@ -59,11 +59,11 @@ describe('appInit sync', ()=> {
     dispatchAction({ type: 'foo' });
   });
 
-  it('supports a func selector', ()=> {
+  it('a func selector', ()=> {
     const app = appBuilder()
       .addAppFunc(
         a => a.type.startsWith('f'), 
-        (s,item) => ({ count: s.count + 1 }))
+        (state,item) => ({ count: state().count + 1 }))
       .setInitialState({ count: 0 })
       .build();
     
@@ -74,16 +74,44 @@ describe('appInit sync', ()=> {
     assert.equal(getCurrentState().count, 2);
   });
 
+  it('appfuncs that want to dispatch', ()=> {
+    
+    const app = appBuilder()
+      .addAppFunc('foo', (state,item) => ({ count: state().count * 2 }))
+      .addAppFunc('bar', (state,item,dispatch) => {
+        dispatch({type: 'foo'});
+        return { count: state().count + 1 };
+      })
+      .setInitialState({ count: 1 })
+      .build();
+
+    let {dispatchAction,getCurrentState} = appInit(app);
+    dispatchAction({ type: 'bar'});
+    assert.equal(getCurrentState().count, 3);
+  });
+
+  it('multiple appfuncs on same action, in sequence of addition', ()=> {
+    const app = appBuilder()
+      .addAppFunc('foo', (state,item) => ({ count: state().count * 2 }))
+      .addAppFunc('foo', (state,item) => ({ count: state().count + 1 }))
+      .setInitialState({ count: 1 })
+      .build();
+
+    let {dispatchAction,getCurrentState} = appInit(app);
+    dispatchAction({ type: 'foo'});
+    assert.equal(getCurrentState().count, 3);
+  });
+
 });
 
 describe('appInit with exceptions', ()=> {
   it('supports a dying app func', ()=> {
     const app = appBuilder()
-      .addAppFunc('foo', (s, item) => { 
+      .addAppFunc('foo', (state, item) => { 
         if (item.die)
           throw new Error("die");
         else
-          return { count: s.count + 1 };
+          return { count: state().count + 1 };
       })
       .setInitialState({ count: 0 })
       .build();
@@ -97,8 +125,8 @@ describe('appInit with exceptions', ()=> {
   it('converts an error to a dispatch', ()=> {
     let error = undefined;
     const app = appBuilder()
-      .addAppFunc('foo', (s, item) => { throw new Error("die"); })
-      .addAppFunc('error', (s, item) => error = item)
+      .addAppFunc('foo', (state, item) => { throw new Error("die"); })
+      .addAppFunc('error', (state, item) => error = item)
       .setInitialState({ count: 0 })
       .build();
     let {dispatchAction} = appInit(app);
@@ -110,7 +138,7 @@ describe('appInit with exceptions', ()=> {
   it('supports a rejected promise', (cb)=> {
     let error = undefined;
     const app = appBuilder()
-      .addAsyncAppFunc('foo', (s,item) => Promise.reject(Error("argh")))
+      .addAsyncAppFunc('foo', (state,item) => Promise.reject(Error("argh")))
       .setInitialState({ count: 0 })
       .build();
 
@@ -123,8 +151,18 @@ describe('appInit with exceptions', ()=> {
       cb();
     });
 
-
     dispatchAction({ type: 'foo'});
-
   });
+
+  it('supports errorListener API', ()=> {
+    let error = undefined;
+    const app = appBuilder()
+      .addAppFunc('foo', (state, item) => { throw new Error("die"); })
+      .addErrorListener((state, item) => { error = item; })
+      .build();
+    let {dispatchAction,actionObservable} = appInit(app);
+    dispatchAction({ type: 'foo'});
+    assert.isDefined(error);
+    assert.equal(error.error.message, "die");
+  })
 })

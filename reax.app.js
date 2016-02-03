@@ -12,6 +12,10 @@ export function appBuilder() {
       appFuncs.push({ selector, func });
       return builder;
     },
+    addErrorListener(func) {
+      appFuncs.push({ selector: 'error', func: (s,a) => { func(s,a); return s(); } });
+      return this;
+    },
     addAsyncAppFunc(selector, async) {
       asyncAppFuncs.push({ selector, async });
       return builder;
@@ -37,12 +41,17 @@ export function appInit(app) {
   const stateObservable = new Subject();
   let currentState = app.initialState;
   stateObservable.subscribe(s => currentState = s);
+
+  const additionalContext = {
+    dispatch: dispatchAction,
+    getState: ()=> currentState
+  };
   
   var allSyncStates = map(app.appFuncs, (appFunc) => {
     return actionObservable
       .filter(createAppFuncFilter(appFunc.selector))
       .withLatestFrom(stateObservable, (action, state) => { return { state, action } })
-      .map(wrapFuncWithErrorDispatch(appFunc.func, dispatchAction));
+      .map(wrapFuncWithErrorDispatch(appFunc.func, additionalContext));
   });
   
   var allAsyncStates = map(app.asyncAppFuncs, (appFunc) => {
@@ -50,7 +59,7 @@ export function appInit(app) {
       .filter(createAppFuncFilter(appFunc.selector))
       .withLatestFrom(stateObservable, (action, state) => { return { state, action } })
       .map(({state,action}) => appFunc
-        .async(state,action)
+        .async(additionalContext.getState, action, dispatchAction)
         .catch(e => {
           dispatchAction({ type: 'error', whileHandling: action, error: e });
           return state;
@@ -77,13 +86,13 @@ export function appInit(app) {
   };
 }
 
-function wrapFuncWithErrorDispatch(appFunc, dispatchAction) {
+function wrapFuncWithErrorDispatch(appFunc, ctx) {
   return ({ state, action}) => {
     try {
-      return appFunc(state, action)
+      return appFunc(ctx.getState, action, ctx.dispatch);
     }
     catch (e) {
-      dispatchAction({ type: 'error', whileHandling: action, error: e });
+      ctx.dispatch({ type: 'error', whileHandling: action, error: e });
       return state;
     }
   };
