@@ -4,7 +4,8 @@
   "description": "playground to check out some react+rx patterns",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --require babel-core/register tests/tests.js"
+    "test": "mocha",
+    "run": "gulp && hs ./wwwroot"
   },
   "author": "flq",
   "license": "MIT",
