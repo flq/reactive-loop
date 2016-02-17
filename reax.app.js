@@ -1,10 +1,11 @@
 import {Observable,Subject} from 'rx';
-import {concat, map, each, isString, isFunction} from 'lodash';
+import {concat, map, reduce, each, isString, isFunction} from 'lodash';
 
 
 export function appBuilder() {
   const appFuncs = [];
   const asyncAppFuncs = [];
+  const stateSugar = [];
   const actionObservables = [];
   let initialState = {};
   const builder = {
@@ -24,12 +25,16 @@ export function appBuilder() {
       actionObservables.push(actionObservable);
       return builder;
     },
+    addStateSugar(func) {
+      stateSugar.push(func);
+      return builder;
+    },
     setInitialState(state) {
       initialState = state;
       return builder;
     },
     build() {
-      return {appFuncs, asyncAppFuncs, actionObservables, initialState};
+      return {appFuncs, asyncAppFuncs, actionObservables, stateSugar, initialState};
     }
   };
   return builder;
@@ -38,9 +43,19 @@ export function appBuilder() {
 export function appInit(app) {
   
   const { dispatchAction, actionObservable } = actionSource();
-  const stateObservable = new Subject();
+  const stateSubject = new Subject();
+  // const stateObservable = app.stateSugar.length > 0 ? 
+  //   stateSubject.map(s => app.stateSugar[0](s)).share() :
+  //   stateSubject;
+
+  const stateObservable = reduce(
+     app.stateSugar,
+     (agg, func) => agg.map(func),
+     stateSubject).share();
+
   let currentState = app.initialState;
-  stateObservable.subscribe(s => currentState = s);
+  stateObservable
+    .subscribe(s => currentState = s);
 
   const additionalContext = {
     dispatch: dispatchAction,
@@ -67,14 +82,16 @@ export function appInit(app) {
       .mergeAll();
   }); 
 
-  Observable
-    .merge(allSyncStates.concat(allAsyncStates))
-    .subscribe((state)=>stateObservable.onNext(state));
+  const stateStream = Observable.merge(allSyncStates.concat(allAsyncStates));
+
+  stateStream
+    .where(state => state != undefined)
+    .subscribe((state)=>stateSubject.onNext(state));
  
   // we put the initial state on the observable which is
   // picked up by the zip calls. However, this means that people
   // who subscribe to the state observable will not get to see the initial state.
-  stateObservable.onNext(app.initialState);
+  stateSubject.onNext(app.initialState);
  
   each(app.actionObservables, o => o.subscribe(msg => dispatchAction(msg)));
 

@@ -102,6 +102,47 @@ describe('appInit supports', ()=> {
     assert.equal(getCurrentState().count, 3);
   });
 
+  it('ignoring appfuncs returning undefined', ()=> {
+    const app = appBuilder()
+      .addAppFunc('foo', (state,item) => {
+        const whatevs = { count: state().count * 2 };
+        //Not returning anything, cause I have nothing to say
+      })
+      .setInitialState({ count: 1 })
+      .build();
+
+    let {dispatchAction,getCurrentState} = appInit(app);
+    dispatchAction({ type: 'foo'});
+    assert.equal(getCurrentState().count, 1); 
+  });
+
+  it('state sugar to enrich state', ()=> {
+    const app = appBuilder()
+      .addAppFunc('foo', (s,a) => ({ count: s().count + 1 }))
+      .addStateSugar(s => ({ count: s.count * 2 }))
+      .setInitialState({ count: 1 })
+      .build();
+
+    let {dispatchAction,getCurrentState} = appInit(app);
+    dispatchAction({ type: 'foo'});
+    // s1 (1) -> sugar -> s2 (2) -> foo -> s3 (3) -> sugar -> s4 (6)
+    assert.equal(getCurrentState().count, 6); 
+  });
+
+  it('multiple sugar to enrich state', ()=> {
+    const app = appBuilder()
+      .addAppFunc('foo', (s,a) => ({ count: s().count + 1 }))
+      .addStateSugar(s => ({ count: s.count * 2 }))
+      .addStateSugar(s => ({ count: s.count + 1 }))
+      .setInitialState({ count: 1 })
+      .build();
+
+    let {dispatchAction,getCurrentState} = appInit(app);
+    dispatchAction({ type: 'foo'});
+    // (1) -> sg1 -> (2) -> sg2 -> (3) -> foo -> (4) -> sg1 -> (8) -> sg2 -> (9)
+    assert.equal(getCurrentState().count, 9); 
+  });
+
 });
 
 describe('appInit with exceptions', ()=> {
@@ -153,6 +194,8 @@ describe('appInit with exceptions', ()=> {
 
     dispatchAction({ type: 'foo'});
   });
+
+  it('supports dying sugar');
 
   it('supports errorListener API', ()=> {
     let error = undefined;
