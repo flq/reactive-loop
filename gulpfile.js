@@ -8,11 +8,14 @@ gulp.task('watch', function(){
   return browserifyWatch('index.js', 'app.js');
 });
 
-gulp.task('default', function() {
-  return bundleShare(
-    browserify({ entries: ['index.js'] }),
-    'app.js'
-  );
+gulp.task('default', ['first', 'rocketLaunch']);
+
+gulp.task('first', function() {
+  return createSample('samples/first.js', 'first.js');
+});
+
+gulp.task('rocketLaunch', function() {
+  return createSample('samples/launch.js', 'launch.js');
 });
 
 function browserifyWatch(input, output){
@@ -29,6 +32,13 @@ function browserifyWatch(input, output){
   
   b.add('./' + input);
   return bundleShare(b, output);
+}
+
+function createSample(input, output) {
+  return bundleShare(
+    browserify({ entries: [input] }),
+    output
+  );
 }
 
 function bundleShare(b, output) {
