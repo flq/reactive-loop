@@ -3,6 +3,9 @@ import {assert} from 'chai';
 import {Observable} from 'rx';
 
 describe('appInit supports', ()=> {
+
+  const fooAct = { type: 'foo' };
+
   it('simple appFunc', ()=> {
     
     const app = appBuilder()
@@ -12,7 +15,7 @@ describe('appInit supports', ()=> {
 
     let {dispatchAction,getCurrentState} = appInit(app);
     
-    dispatchAction({ type: 'foo' });
+    dispatchAction(fooAct);
     assert.equal(getCurrentState().count, 1);
   });
 
@@ -26,11 +29,11 @@ describe('appInit supports', ()=> {
 
     let {dispatchAction,getCurrentState} = appInit(app);
     
-    dispatchAction({ type: 'foo' });
+    dispatchAction(fooAct);
     assert.equal(getCurrentState().count, 1);
     dispatchAction({ type: 'bar' });
     assert.equal(getCurrentState().count, 4);
-    dispatchAction({ type: 'foo' });
+    dispatchAction(fooAct);
     assert.equal(getCurrentState().count, 5);
   });
 
@@ -56,7 +59,7 @@ describe('appInit supports', ()=> {
       assert.equal(s.count, 1);
       cb();
     });
-    dispatchAction({ type: 'foo' });
+    dispatchAction(fooAct);
   });
 
   it('a func selector', ()=> {
@@ -98,7 +101,7 @@ describe('appInit supports', ()=> {
       .build();
 
     let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction({ type: 'foo'});
+    dispatchAction(fooAct);
     assert.equal(getCurrentState().count, 3);
   });
 
@@ -112,7 +115,7 @@ describe('appInit supports', ()=> {
       .build();
 
     let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction({ type: 'foo'});
+    dispatchAction(fooAct);
     assert.equal(getCurrentState().count, 1); 
   });
 
@@ -124,7 +127,7 @@ describe('appInit supports', ()=> {
       .build();
 
     let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction({ type: 'foo'});
+    dispatchAction(fooAct);
     // s1 (1) -> sugar -> s2 (2) -> foo -> s3 (3) -> sugar -> s4 (6)
     assert.equal(getCurrentState().count, 6); 
   });
@@ -138,9 +141,35 @@ describe('appInit supports', ()=> {
       .build();
 
     let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction({ type: 'foo'});
+    dispatchAction(fooAct);
     // (1) -> sg1 -> (2) -> sg2 -> (3) -> foo -> (4) -> sg1 -> (8) -> sg2 -> (9)
     assert.equal(getCurrentState().count, 9); 
+  });
+
+  it('dispatching an observable', ()=> {
+    const app = appBuilder()
+      .addAppFunc('foo', (s,a) => ({ count: s().count + 1 }))
+      .addAppFunc('bar', (s,a,d) => d(Observable.fromArray([fooAct, fooAct])))
+      .setInitialState({ count: 1 })
+      .build();
+
+    let {dispatchAction,getCurrentState} = appInit(app);
+    dispatchAction({ type: 'bar' });
+    assert.equal(getCurrentState().count, 3);
+  });
+
+});
+
+describe('appInit with problems', ()=> {
+  it('ignores state Sugar that returns nothing', ()=> {
+    const app = appBuilder()
+      .addStateSugar(s => {if (s.count > 1) return { count: 5}; })
+      .setInitialState({ count: 1})
+      .build();
+
+    let {getCurrentState} = appInit(app);
+    assert.isObject(getCurrentState());
+    assert.equal(getCurrentState().count, 1);
   });
 
 });

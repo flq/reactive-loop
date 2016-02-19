@@ -44,16 +44,14 @@ export function appInit(app) {
   
   const { dispatchAction, actionObservable } = actionSource();
   const stateSubject = new Subject();
-  // const stateObservable = app.stateSugar.length > 0 ? 
-  //   stateSubject.map(s => app.stateSugar[0](s)).share() :
-  //   stateSubject;
 
   const stateObservable = reduce(
      app.stateSugar,
-     (agg, func) => agg.map(func),
+     (agg, func) => agg.map(wrapStateSugarFunc(func)),
      stateSubject).share();
 
   let currentState = app.initialState;
+
   stateObservable
     .subscribe(s => currentState = s);
 
@@ -115,10 +113,25 @@ function wrapFuncWithErrorDispatch(appFunc, ctx) {
   };
 }
 
+function wrapStateSugarFunc(func) {
+  return s => {
+    var result = func(s);
+    return result !== undefined ? result : s;
+  }
+}
+
 function actionSource() { 
   var actionObservable = new Subject();
   return { 
-    dispatchAction(action) { actionObservable.onNext(action) }, 
+    dispatchAction(action) {
+      if (!action.subscribe) {
+        //Possibly weak assumption of this NOT being an observable
+        action = Observable.just(action);
+      }
+      action.subscribe(a => {
+        actionObservable.onNext(a); 
+      }); 
+    }, 
     actionObservable 
   };
 }

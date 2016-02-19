@@ -43,9 +43,7 @@ function createSample(input, output) {
 
 function bundleShare(b, output) {
   return b
-    .transform(babelify.configure({
-      presets: ["es2015", "react"]
-    }))
+    .transform(babelify)
     .bundle()
     .pipe(source(output))
     .pipe(gulp.dest('./wwwroot/assets'));

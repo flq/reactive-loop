@@ -13,6 +13,7 @@ export class ReaxConnector extends Component {
     this.getCurrentState = getCurrentState;
     this.stateObservable = stateObservable;
     this.dispatchAction = dispatchAction;
+    this.state = getCurrentState();
   }
 
   componentWillMount() {
