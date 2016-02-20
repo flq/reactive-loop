@@ -48,14 +48,15 @@ export function connect(ReactComponent, stateSelector = s => {}) {
       this.nextProps = this.constructProps();
     }
 
-    componentWillUpdate() {
-     this.nextProps = this.constructProps(); 
+    componentWillUpdate(nextProps) {
+     this.nextProps = this.constructProps(nextProps); 
     }
 
-    constructProps() {
+    constructProps(nextProps) {
       return assign(
         {}, 
-        this.props, 
+        this.props,
+        nextProps, 
         stateSelector(this.context.state()), 
         { dispatch: this.context.dispatch});
     }

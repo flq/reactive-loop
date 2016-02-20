@@ -1,6 +1,7 @@
 import {appInit,appBuilder} from '../reax.app';
 import {assert} from 'chai';
 import {Observable} from 'rx';
+import {assign} from 'lodash';
 
 describe('appInit supports', ()=> {
 
@@ -130,6 +131,17 @@ describe('appInit supports', ()=> {
     dispatchAction(fooAct);
     // s1 (1) -> sugar -> s2 (2) -> foo -> s3 (3) -> sugar -> s4 (6)
     assert.equal(getCurrentState().count, 6); 
+  });
+
+  it('calling state sugar AFTER the action-based mutation', ()=> {
+    const app = appBuilder()
+      .addAppFunc('foo', (s,a) => ({ count: s().count + 1 }))
+      .addStateSugar(s => s.count == 2 ? assign(s, { seeState: true }) : s)
+      .setInitialState({ count: 1 })
+      .build();
+    let {dispatchAction,getCurrentState} = appInit(app);
+    dispatchAction(fooAct);
+    assert.isTrue(getCurrentState().seeState); 
   });
 
   it('multiple sugar to enrich state', ()=> {
