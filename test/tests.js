@@ -1,4 +1,4 @@
-import {appInit,appBuilder} from '../reax.app';
+import {appInit,appBuilder, assign as reaxAssign} from '../reax.app';
 import {assert} from 'chai';
 import {Observable} from 'rx';
 import {assign} from 'lodash';
@@ -123,7 +123,7 @@ describe('appInit supports', ()=> {
   it('state sugar to enrich state', ()=> {
     const app = appBuilder()
       .addAppFunc('foo', (s,a) => ({ count: s().count + 1 }))
-      .addStateSugar(s => ({ count: s.count * 2 }))
+      .addStateRefinement(s => ({ count: s.count * 2 }))
       .setInitialState({ count: 1 })
       .build();
 
@@ -136,7 +136,7 @@ describe('appInit supports', ()=> {
   it('calling state sugar AFTER the action-based mutation', ()=> {
     const app = appBuilder()
       .addAppFunc('foo', (s,a) => ({ count: s().count + 1 }))
-      .addStateSugar(s => s.count == 2 ? assign(s, { seeState: true }) : s)
+      .addStateRefinement(s => s.count == 2 ? assign(s, { seeState: true }) : s)
       .setInitialState({ count: 1 })
       .build();
     let {dispatchAction,getCurrentState} = appInit(app);
@@ -147,8 +147,8 @@ describe('appInit supports', ()=> {
   it('multiple sugar to enrich state', ()=> {
     const app = appBuilder()
       .addAppFunc('foo', (s,a) => ({ count: s().count + 1 }))
-      .addStateSugar(s => ({ count: s.count * 2 }))
-      .addStateSugar(s => ({ count: s.count + 1 }))
+      .addStateRefinement(s => ({ count: s.count * 2 }))
+      .addStateRefinement(s => ({ count: s.count + 1 }))
       .setInitialState({ count: 1 })
       .build();
 
@@ -175,7 +175,7 @@ describe('appInit supports', ()=> {
 describe('appInit with problems', ()=> {
   it('ignores state Sugar that returns nothing', ()=> {
     const app = appBuilder()
-      .addStateSugar(s => {if (s.count > 1) return { count: 5}; })
+      .addStateRefinement(s => {if (s.count > 1) return { count: 5}; })
       .setInitialState({ count: 1})
       .build();
 
@@ -249,4 +249,57 @@ describe('appInit with exceptions', ()=> {
     assert.isDefined(error);
     assert.equal(error.error.message, "die");
   })
+});
+
+describe('higher-level API', ()=> {
+  it('supports adding app funcs', ()=> {
+    var appFuncs = ()=> ({ 
+      onFoo(s) { return { count: s().count + 1 } } 
+    });
+
+    const app = appBuilder()
+      .addApp(appFuncs)
+      .setInitialState({count: 1})
+      .build();
+
+    let {dispatchAction,getCurrentState} = appInit(app);
+    dispatchAction({ type: 'foo'});
+
+    assert.equal(getCurrentState().count, 2);
+  });
+
+  it('supports adding state refinements', ()=> {
+    var appFuncs = ()=> ({ 
+      onFoo(s) { return { count: s().count + 1 } },
+      refineState(s) { 
+        s.refined = true;
+        return s;
+      }
+    });
+
+    const app = appBuilder()
+      .addApp(appFuncs)
+      .setInitialState({count: 1})
+      .build();
+
+    let {dispatchAction,getCurrentState} = appInit(app);
+    dispatchAction({ type: 'foo'});
+    assert.isTrue(getCurrentState().refined);
+
+  });
 })
+
+describe('own assign', ()=> {
+  it('does create a new object', ()=> {
+    let obj = { val: "One" };
+    let obj2 = reaxAssign(obj, { valTwo: "Two" }, { ui: { sth: true } });
+    assert.deepEqual(obj2, {
+      val: "One",
+      valTwo: "Two",
+      ui: {
+        sth: true
+      }
+    });
+    assert.notStrictEqual(obj, obj2);
+  });
+});

@@ -1,14 +1,28 @@
 import {Observable,Subject} from 'rx';
-import {concat, map, reduce, each, isString, isFunction} from 'lodash';
+import {
+  assign as lodashAssign,
+  concat, 
+  each,
+  forOwn,
+  isString, 
+  isFunction, 
+  map, 
+  reduce} from 'lodash';
 
 
 export function appBuilder() {
+  const apps = [];
   const appFuncs = [];
   const asyncAppFuncs = [];
   const stateSugar = [];
   const actionObservables = [];
   let initialState = {};
+
   const builder = {
+    addApp(appProviderFunc) {
+      apps.push(appProviderFunc);
+      return builder;
+    },
     addAppFunc(selector, func) {
       appFuncs.push({ selector, func });
       return builder;
@@ -25,7 +39,7 @@ export function appBuilder() {
       actionObservables.push(actionObservable);
       return builder;
     },
-    addStateSugar(func) {
+    addStateRefinement(func) {
       stateSugar.push(func);
       return builder;
     },
@@ -34,7 +48,7 @@ export function appBuilder() {
       return builder;
     },
     build() {
-      return {appFuncs, asyncAppFuncs, actionObservables, stateSugar, initialState};
+      return {apps, appFuncs, asyncAppFuncs, actionObservables, stateSugar, initialState};
     }
   };
   return builder;
@@ -45,20 +59,24 @@ export function appInit(app) {
   const { dispatchAction, actionObservable } = actionSource();
   const stateSubject = new Subject();
 
-  const stateObservable = reduce(
-     app.stateSugar,
-     (agg, func) => agg.map(wrapStateSugarFunc(func)),
-     stateSubject).share();
-
   let currentState = app.initialState;
-
-  stateObservable
-    .subscribe(s => currentState = s);
 
   const additionalContext = {
     dispatch: dispatchAction,
     getState: ()=> currentState
   };
+
+  var {appFuncs, stateRefinements} = resolveAppFuncs(app.apps, additionalContext);
+  each(appFuncs, appFunc => app.appFuncs.push(appFunc));
+  each(stateRefinements, refinement => app.stateSugar.push(refinement));
+
+  const stateObservable = reduce(
+     app.stateSugar,
+     (agg, func) => agg.map(wrapStateSugarFunc(func)),
+     stateSubject).share();
+
+  stateObservable
+    .subscribe(s => currentState = s);
   
   var allSyncStates = map(app.appFuncs, (appFunc) => {
     return actionObservable
@@ -99,6 +117,10 @@ export function appInit(app) {
     actionObservable,
     dispatchAction
   };
+}
+
+export function assign(...all) {
+  return lodashAssign({}, ...all);
 }
 
 function wrapFuncWithErrorDispatch(appFunc, ctx) {
@@ -142,4 +164,29 @@ function createAppFuncFilter(selector) {
   if (isFunction(selector))
     return selector;
   return (f => false); // This handler will never match with any action
+}
+
+function getActionTypeFromFunctionName(methodName) {
+  if (!isString(methodName))
+    return undefined;
+  if (!methodName.startsWith("on"))
+    return methodName;
+  var actionName = methodName.substring(2);
+  return actionName.charAt(0).toLowerCase() + actionName.substring(1);
+}
+
+function resolveAppFuncs(apps, context) {
+  const appFuncs = [];
+  const stateRefinements = [];
+  each(apps, a => {
+    var appFuncsObj = a(context);
+    forOwn(appFuncsObj, (val, key) => {
+      var selector = getActionTypeFromFunctionName(key);
+      if (selector)
+        appFuncs.push({ selector, func: val });
+      if (key.startsWith('refine'))
+        stateRefinements.push(val);
+    });
+  });
+  return {appFuncs, stateRefinements};
 }
