@@ -4,12 +4,11 @@ import {Observable} from 'rx';
 import {ReaxConnector, connect} from '../reax.react';
 import {appBuilder, assign} from '../reax.app';
 
-const { Component, PropTypes, Children } = React;
 
 const COUNTER_START = 10;
 const POINT_OF_NO_RETURN = 4;
 
-function launchAppFuncs() {
+function launchApp() {
   return {
     onInitLaunch(s,a,d) {
       d(Observable
@@ -31,12 +30,7 @@ function launchAppFuncs() {
     onTick(s, a) {
       const {countdownRunning, counter} = s();
       return assign(s(), {counter: counter - a.increment});
-    }
-  }
-}
-
-function launchStateRefinements() {
-  return {
+    },
     refineUi(s) {
       const {countdownRunning, launched, counter} = s;
       const isInCancellableRange = counter > POINT_OF_NO_RETURN && counter < COUNTER_START;
@@ -57,7 +51,7 @@ function launchStateRefinements() {
 
 const app = appBuilder()
   .setInitialState({counter: COUNTER_START, countdownRunning: false, launched: false })
-  .addApp(launchAppFuncs)
+  .addApp(launchApp)
   .addApp(launchStateRefinements)
   .build();
 
@@ -73,7 +67,6 @@ const DispatcherButton = connect(({label,type,dispatch,...other}) =>
 const If = ({condition, children}) => {
    return condition ? children : <span/>;
 };
-
 
 const App = connect(({ui, counter, launched}) =>
   (<div>

@@ -15,10 +15,27 @@ const Button = connect(({id,label,dispatch}) => (
     value={label}
     onClick={()=>dispatch({ type: id })} />));
 
+function undoApp() {
+
+  const stateStack = [];
+
+  return {
+    onUndo(s,a,d) {
+      stateStack.pop(); // current
+      var last = stateStack.pop();
+      return last;
+    },
+    monitorState(s) {
+      stateStack.push(s);
+    }
+  }
+}
+
 global.App = {
   init(renderTarget) {
 
     const app = appBuilder()
+      .addApp(undoApp)
       .addAppFunc('sproink', (s, a) => { return { count: s().count + 1 } })
       .setInitialState({count: 0})
       .build();
@@ -26,6 +43,7 @@ global.App = {
     ReactDom.render(
       <ReaxConnector app={ app }>
         <Button id="sproink" label="Cause a hubbub" />
+        <Button id="undo" label="Undo" />
         <HelloWorld />
       </ReaxConnector>, renderTarget);
   }

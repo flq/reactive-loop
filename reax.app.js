@@ -184,7 +184,7 @@ function resolveAppFuncs(apps, context) {
       var selector = getActionTypeFromFunctionName(key);
       if (selector)
         appFuncs.push({ selector, func: val });
-      if (key.startsWith('refine'))
+      if (key.startsWith('refine') || key.startsWith('monitor'))
         stateRefinements.push(val);
     });
   });
