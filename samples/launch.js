@@ -52,7 +52,6 @@ function launchApp() {
 const app = appBuilder()
   .setInitialState({counter: COUNTER_START, countdownRunning: false, launched: false })
   .addApp(launchApp)
-  .addApp(launchStateRefinements)
   .build();
 
 const DispatcherButton = connect(({label,type,dispatch,...other}) =>
