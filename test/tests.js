@@ -216,8 +216,6 @@ describe('appInit with exceptions', ()=> {
     dispatchAction({ type: 'foo'});
   });
 
-  it('supports dying sugar');
-
   it('supports errorListener API', ()=> {
     let error = undefined;
     const app = appBuilder()
@@ -228,11 +226,15 @@ describe('appInit with exceptions', ()=> {
     dispatchAction({ type: 'foo'});
     assert.isDefined(error);
     assert.equal(error.error.message, "die");
-  })
+  });
+
+  it('supports dying sugar');
+
+  it ('supports misbehaved async func returning undefined');
 });
 
 describe('higher-level API', ()=> {
-  it('supports adding app funcs', ()=> {
+  it('supports adding app funcs (on...(s,a,d) : s)', ()=> {
     var appFuncs = ()=> ({ 
       onFoo(s) { return { count: s().count + 1 } } 
     });
@@ -248,24 +250,42 @@ describe('higher-level API', ()=> {
     assert.equal(getCurrentState().count, 2);
   });
 
-  it('supports adding state refinements', ()=> {
+  it('supports adding state refinements (monitor|refine...(s) : s)', ()=> {
     var appFuncs = ()=> ({ 
-      onFoo(s) { return { count: s().count + 1 } },
+      onFoo: countUp,
       refineState(s) { 
         s.refined = true;
         return s;
       }
     });
 
-    const app = appBuilder()
-      .addApp(appFuncs)
-      .setInitialState({count: 1})
-      .build();
+    let {getState} = testRig(b => b.addApp(appFuncs));
+    assert.isTrue(getState({ type: 'foo'}).refined);
+  });
 
-    let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction({ type: 'foo'});
-    assert.isTrue(getCurrentState().refined);
+  it('supports adding action providers (dispatch...())', ()=> {
+    var appFuncs = ()=> ({ 
+      dispatchStuff() { return Observable.return({ type:'foo' }) },
+      onFoo: countUp
+    });
 
+    let {getCurrentState} = testRig(b => b.addApp(appFuncs));
+    assert.equal(getCurrentState().count, 2);
+  });
+
+  it('supportsAddingAsyncFuncs', (cb) => {
+
+    const app = ()=> ({
+      onFooAsync(state,item) { return Promise.resolve({ count: state().count + 1 }); }
+    });
+
+    let {dispatchAction,stateObservable} = testRig(b => b.addApp(app));
+    
+    stateObservable.subscribe(s => {
+      assert.equal(s.count, 2);
+      cb();
+    });
+    dispatchAction(fooAct);
   });
 })
 
