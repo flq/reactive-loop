@@ -3,50 +3,53 @@ import {assert} from 'chai';
 import {Observable} from 'rx';
 import {assign} from 'lodash';
 
-describe('appInit supports', ()=> {
+function testRig(appBuilderPipeline, initialState) {
+  const builder = appBuilderPipeline(appBuilder());
+  builder.setInitialState(initialState || {count: 1});
 
-  const fooAct = { type: 'foo' };
+  const instruments = appInit(builder.build());
+  instruments.getCount = 
+    (function(action) { 
+      return this.getState(action).count; 
+    }).bind(instruments);
+  instruments.getState = 
+    (function(action) { 
+      this.dispatchAction(action);
+      return this.getCurrentState(); 
+    }).bind(instruments);
+  return instruments;
+}
+
+const fooAct = { type: 'foo' };
+const countUp = (s, a) => ({ count: s().count + 1 });
+
+describe('appInit supports', ()=> {
 
   it('simple appFunc', ()=> {
     
-    const app = appBuilder()
-      .addAppFunc('foo', (state, item) => { return { count: state().count + 1 } })
-      .setInitialState({ count: 0 })
-      .build();
-
-    let {dispatchAction,getCurrentState} = appInit(app);
+    let {getCount} = testRig(b => b.addAppFunc('foo', countUp));
     
-    dispatchAction(fooAct);
-    assert.equal(getCurrentState().count, 1);
+    assert.equal(getCount(fooAct),2);
   });
 
   it('two appFuncs', ()=> {
     
-    const app = appBuilder()
-      .addAppFunc('foo', (state, item) => { return { count: state().count + 1 } })
-      .addAppFunc('bar', (state, item) => { return { count: state().count + 3 } })
-      .setInitialState({ count: 0 })
-      .build();
+    const countThree = (state, item) => ({ count: state().count + 3 });
 
-    let {dispatchAction,getCurrentState} = appInit(app);
+    let {getCount} = testRig(b => b.addAppFunc('foo',countUp).addAppFunc('bar',countThree));
     
-    dispatchAction(fooAct);
-    assert.equal(getCurrentState().count, 1);
-    dispatchAction({ type: 'bar' });
-    assert.equal(getCurrentState().count, 4);
-    dispatchAction(fooAct);
-    assert.equal(getCurrentState().count, 5);
+    assert.equal(getCount(fooAct), 2);
+    assert.equal(getCount({ type: 'bar' }), 5);
+    assert.equal(getCount(fooAct), 6);
   });
 
   it('action sources', ()=> {
-    const app = appBuilder()
-      .addAppFunc('foo', (state, item) => { return { count: state().count + 1 } })
-      .addActionSource(Observable.return({ type:'foo' }))
-      .setInitialState({ count: 0 })
-      .build();
 
-    let {dispatchAction,getCurrentState} = appInit(app);
-    assert.equal(getCurrentState().count, 1);
+    let { getCurrentState} = testRig(b => b
+      .addAppFunc('foo', countUp)
+      .addActionSource(Observable.return({ type:'foo' })));
+
+    assert.equal(getCurrentState().count, 2);
   });
 
   it('async app funcs', (cb)=> {
@@ -64,144 +67,121 @@ describe('appInit supports', ()=> {
   });
 
   it('a func selector', ()=> {
-    const app = appBuilder()
-      .addAppFunc(
-        a => a.type.startsWith('f'), 
-        (state,item) => ({ count: state().count + 1 }))
-      .setInitialState({ count: 0 })
-      .build();
-    
-    let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction({type: 'ar'});
-    dispatchAction({type: 'foo'});
-    dispatchAction({type: 'fa'});
-    assert.equal(getCurrentState().count, 2);
+
+    let {getCount} = testRig(b => b
+      .addAppFunc(a => a.type.startsWith('f'), countUp));
+
+    assert.equal(getCount({type: 'ar'}), 1);
+    assert.equal(getCount({type: 'foo'}), 2);
+    assert.equal(getCount({type: 'fa'}), 3);
+
   });
 
   it('appfuncs that want to dispatch', ()=> {
     
-    const app = appBuilder()
-      .addAppFunc('foo', (state,item) => ({ count: state().count * 2 }))
-      .addAppFunc('bar', (state,item,dispatch) => {
+    const [multiply,dispatchFunc] = [
+      (state,item) => ({ count: state().count * 2 }),
+      (state,item,dispatch) => {
         dispatch({type: 'foo'});
         return { count: state().count + 1 };
-      })
-      .setInitialState({ count: 1 })
-      .build();
+      }];
 
-    let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction({ type: 'bar'});
-    assert.equal(getCurrentState().count, 3);
+    let {getCount} = testRig(b => b
+      .addAppFunc('foo', multiply)
+      .addAppFunc('bar', dispatchFunc));
+
+    assert.equal(getCount({ type: 'bar'}), 3);
   });
 
   it('multiple appfuncs on same action, in sequence of addition', ()=> {
-    const app = appBuilder()
-      .addAppFunc('foo', (state,item) => ({ count: state().count * 2 }))
-      .addAppFunc('foo', (state,item) => ({ count: state().count + 1 }))
-      .setInitialState({ count: 1 })
-      .build();
+    const multiply = (state,item) => ({ count: state().count * 2 });
+    
+    let {getCount} = testRig(b => b
+      .addAppFunc('foo', multiply)
+      .addAppFunc('foo', countUp));
 
-    let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction(fooAct);
-    assert.equal(getCurrentState().count, 3);
-  });
-
-  it('ignoring appfuncs returning undefined', ()=> {
-    const app = appBuilder()
-      .addAppFunc('foo', (state,item) => {
-        const whatevs = { count: state().count * 2 };
-        //Not returning anything, cause I have nothing to say
-      })
-      .setInitialState({ count: 1 })
-      .build();
-
-    let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction(fooAct);
-    assert.equal(getCurrentState().count, 1); 
+    assert.equal(getCount(fooAct), 3);
   });
 
   it('state sugar to enrich state', ()=> {
-    const app = appBuilder()
-      .addAppFunc('foo', (s,a) => ({ count: s().count + 1 }))
-      .addStateRefinement(s => ({ count: s.count * 2 }))
-      .setInitialState({ count: 1 })
-      .build();
 
-    let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction(fooAct);
+    let {getCount} = testRig(b => b
+      .addAppFunc('foo',countUp)
+      .addStateRefinement(s => ({ count: s.count * 2 })));
+
     // s1 (1) -> sugar -> s2 (2) -> foo -> s3 (3) -> sugar -> s4 (6)
-    assert.equal(getCurrentState().count, 6); 
+    assert.equal(getCount(fooAct), 6); 
   });
 
   it('calling state sugar AFTER the action-based mutation', ()=> {
-    const app = appBuilder()
-      .addAppFunc('foo', (s,a) => ({ count: s().count + 1 }))
-      .addStateRefinement(s => s.count == 2 ? assign(s, { seeState: true }) : s)
-      .setInitialState({ count: 1 })
-      .build();
-    let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction(fooAct);
-    assert.isTrue(getCurrentState().seeState); 
+
+    let {getState} = testRig(b => b
+      .addAppFunc('foo',countUp)
+      .addStateRefinement(s => s.count == 2 ? assign(s, { seeState: true }) : s));
+
+    assert.isTrue(getState(fooAct).seeState); 
   });
 
   it('multiple sugar to enrich state', ()=> {
-    const app = appBuilder()
-      .addAppFunc('foo', (s,a) => ({ count: s().count + 1 }))
-      .addStateRefinement(s => ({ count: s.count * 2 }))
-      .addStateRefinement(s => ({ count: s.count + 1 }))
-      .setInitialState({ count: 1 })
-      .build();
 
-    let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction(fooAct);
+    let {getCount} = testRig(b => b
+      .addAppFunc('foo', countUp)
+      .addStateRefinement(s => ({ count: s.count * 2 }))
+      .addStateRefinement(s => ({ count: s.count + 1 })));
+
     // (1) -> sg1 -> (2) -> sg2 -> (3) -> foo -> (4) -> sg1 -> (8) -> sg2 -> (9)
-    assert.equal(getCurrentState().count, 9); 
+    assert.equal(getCount(fooAct), 9); 
   });
 
   it('dispatching an observable', ()=> {
-    const app = appBuilder()
-      .addAppFunc('foo', (s,a) => ({ count: s().count + 1 }))
-      .addAppFunc('bar', (s,a,d) => d(Observable.fromArray([fooAct, fooAct])))
-      .setInitialState({ count: 1 })
-      .build();
 
-    let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction({ type: 'bar' });
-    assert.equal(getCurrentState().count, 3);
+    let {getCount} = testRig(b => b
+      .addAppFunc('foo', countUp)
+      .addAppFunc('bar', (s,a,d) => d(Observable.fromArray([fooAct, fooAct]))));
+
+    assert.equal(getCount({ type: 'bar' }), 3);
   });
 
 });
 
 describe('appInit with problems', ()=> {
-  it('ignores state Sugar that returns nothing', ()=> {
-    const app = appBuilder()
-      .addStateRefinement(s => {if (s.count > 1) return { count: 5}; })
-      .setInitialState({ count: 1})
-      .build();
 
-    let {getCurrentState} = appInit(app);
+  it('ignores state Sugar that returns nothing', ()=> {
+
+    let {getCurrentState} = testRig(b => b
+      .addStateRefinement(s => {if (s.count > 1) return { count: 5}; }));
+
     assert.isObject(getCurrentState());
     assert.equal(getCurrentState().count, 1);
+  });
+
+  it('ignores appfuncs returning undefined', ()=> {
+
+    const noReturnVal = (state,item) => {
+      const whatevs = { count: state().count * 2 };
+      //Not returning anything, cause I have nothing to say
+    };
+
+    let {getCount} = testRig(b => b.addAppFunc('foo', noReturnVal));
+
+    assert.equal(getCount(fooAct), 1);
   });
 
 });
 
 describe('appInit with exceptions', ()=> {
   it('supports a dying app func', ()=> {
-    const app = appBuilder()
+
+    let {getCount} = testRig(b => b
       .addAppFunc('foo', (state, item) => { 
         if (item.die)
           throw new Error("die");
         else
           return { count: state().count + 1 };
-      })
-      .setInitialState({ count: 0 })
-      .build();
+      }));
 
-    let {dispatchAction,getCurrentState} = appInit(app);
-    dispatchAction({ type: 'foo', die: true });
-    dispatchAction({ type: 'foo', die: false });
-    assert.equal(getCurrentState().count, 1);
+    assert.equal(getCount({ type: 'foo', die: true }), 1);
+    assert.equal(getCount({ type: 'foo', die: false }), 2);
   });
 
   it('converts an error to a dispatch', ()=> {
