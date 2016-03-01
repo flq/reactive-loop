@@ -222,15 +222,47 @@ describe('appInit with exceptions', ()=> {
       .addAppFunc('foo', (state, item) => { throw new Error("die"); })
       .addErrorListener((state, item) => { error = item; })
       .build();
-    let {dispatchAction,actionObservable} = appInit(app);
+    let {dispatchAction} = appInit(app);
     dispatchAction({ type: 'foo'});
     assert.isDefined(error);
     assert.equal(error.error.message, "die");
   });
 
-  it('supports dying sugar');
+  it('supports dying sugar', (cb)=> {
+    let error = undefined;
+    const app = appBuilder()
+      .addStateRefinement(state => { throw new Error("die"); })
+      .addErrorListener((state, item) => { 
+        error = item; 
+      })
+      .build();
 
-  it ('supports misbehaved async func returning undefined');
+    let {actionObservable} = appInit(app);
+    actionObservable.subscribe(a => {
+      //Initial state is observed, so we already should have an error...
+      assert.isDefined(error);
+      assert.equal(error.error.message, "die");
+      cb();
+    })
+    
+
+  });
+
+  it ('supports misbehaved async func returning undefined', ()=> {
+
+    const app = appBuilder()
+      .addAsyncAppFunc('foo', (state,item) => {  })
+      .addAppFunc('bar', countUp)
+      .setInitialState({ count: 0 })
+      .build();
+
+    let {dispatchAction,getCurrentState} = appInit(app);
+    
+    assert.doesNotThrow(()=> { dispatchAction(fooAct); });
+    dispatchAction({type: 'bar'});
+    assert.equal(getCurrentState().count, 1);
+
+  });
 });
 
 describe('higher-level API', ()=> {

@@ -70,16 +70,17 @@ export function appInit(app) {
 
   const stateObservable = reduce(
      app.stateSugar,
-     (agg, func) => agg.map(wrapStateSugarFunc(func)),
+     (agg, func) => agg.map(wrapStateSugarFunc(func, additionalContext)),
      stateSubject).share();
 
   stateObservable
     .subscribe(s => currentState = s);
   
   var allSyncStates = map(app.appFuncs, (appFunc) => {
+
     return actionObservable
       .filter(createAppFuncFilter(appFunc.selector))
-      .withLatestFrom(stateObservable, (action, state) => { return { state, action } })
+      .withLatestFrom(stateObservable, (action, state) => ({ state, action }))
       .map(wrapFuncWithErrorDispatch(appFunc.func, additionalContext));
   });
   
@@ -87,12 +88,18 @@ export function appInit(app) {
     return actionObservable
       .filter(createAppFuncFilter(appFunc.selector))
       .withLatestFrom(stateObservable, (action, state) => { return { state, action } })
-      .map(({state,action}) => appFunc
-        .async(additionalContext.getState, action, dispatchAction)
-        .catch(e => {
-          dispatchAction({ type: 'error', whileHandling: action, error: e });
-          return state;
-        }))
+      .map(({state,action}) => {
+        try {
+          return appFunc.async(additionalContext.getState, action, dispatchAction)
+              .catch(e => {
+                dispatchAction({ type: 'error', whileHandling: action, error: e });
+                return state;
+              })
+        }
+        catch(e) {
+          return Promise.resolve(undefined);
+        }
+      })
       .mergeAll();
   }); 
 
@@ -133,9 +140,19 @@ function wrapFuncWithErrorDispatch(appFunc, ctx) {
   };
 }
 
-function wrapStateSugarFunc(func) {
+function wrapStateSugarFunc(func, {dispatch}) {
+  var result = undefined;
   return s => {
-    var result = func(s);
+    try {
+      result = func(s);
+    }
+    catch(e) {
+      // O..kay. Consider the situation that the exception happens already with the very first state.
+      // In this case, the error action cannot be matched with any state and the error handler 
+      // would not be called. One solution is to delay the dispatch and let the state flow through
+      // before the action goes its way.
+      dispatch(Observable.just({ type: 'error', error: e }).delay(50));
+    }
     return result !== undefined ? result : s;
   }
 }
