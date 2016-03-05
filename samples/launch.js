@@ -5,8 +5,8 @@ import {ReaxConnector, connect} from '../reax.react';
 import {appBuilder, assign} from '../reax.app';
 
 
-const COUNTER_START = 10;
-const POINT_OF_NO_RETURN = 4;
+const COUNTER_START = 12;
+const POINT_OF_NO_RETURN = 6;
 
 function launchApp() {
   return {
