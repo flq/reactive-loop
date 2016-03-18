@@ -2,8 +2,7 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import {Observable} from 'rx';
 import {assign} from 'lodash';
-import {ReaxConnector, connect} from '../reax.react';
-import {appBuilder} from '../reax.app';
+import {appBuilder, ReaxConnector, connect} from '../src/index';
 
 const { Component, PropTypes, Children } = React; 
 

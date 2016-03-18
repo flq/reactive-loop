@@ -1,8 +1,7 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 import {Observable} from 'rx';
-import {ReaxConnector, connect} from '../reax.react';
-import {appBuilder, assign} from '../reax.app';
+import {appBuilder, assign, ReaxConnector, connect} from '../src/index';
 
 
 const COUNTER_START = 12;

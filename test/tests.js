@@ -1,4 +1,4 @@
-import {appInit,appBuilder, assign as reaxAssign} from '../reax.app';
+import {appInit,appBuilder, assign as reaxAssign} from '../src/index';
 import {assert} from 'chai';
 import {Observable} from 'rx';
 import {assign} from 'lodash';
