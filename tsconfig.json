@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "lib"
+  },
+  "files": [ 
+    "typings/main.d.ts",
+    "src/assign.ts",
+    "src/appBuilder.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

@@ -2,9 +2,10 @@
   "name": "reax",
   "version": "0.9.0",
   "description": "A library supporting the definition of a reactive loop, similar to redux and with support for react",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "mocha",
+    "compile": "tsc",
     "build": "babel src --out-dir lib",
     "samples:build": "webpack",
     "samples:run": "webpack-dev-server --content-base wwwroot/"
@@ -34,6 +35,7 @@
     "babel-preset-react": "^6.3.13",
     "chai": "^3.4.1",
     "mocha": "^2.3.4",
+    "typescript": "^1.8.9",
     "webpack": "^1.12.14",
     "webpack-dev-server": "^1.14.1"
   },
