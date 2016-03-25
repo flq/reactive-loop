@@ -1,0 +1,7 @@
+{
+  "gitbook": "2.x.x",
+  "plugins": ["toc"],
+  "structure": {
+    "summary": "docs/SUMMARY.md"
+  }
+}
