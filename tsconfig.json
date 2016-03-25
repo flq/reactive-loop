@@ -6,7 +6,8 @@
   "files": [ 
     "typings/main.d.ts",
     "src/assign.ts",
-    "src/appBuilder.ts"
+    "src/appBuilder.ts",
+    "src/appInit.ts"
   ],
   "exclude": [
     "node_modules"

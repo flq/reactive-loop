@@ -1,20 +1,32 @@
+import {Observable} from "rx";
+
 import {
+  Action,
   ReaxApp, 
   AppFunc, 
   Selector, 
-  SadFunc
+  SADFunc,
+  AsyncAppFunc,
+  AsyncSADFunc,
+  AppArtefacts
 } from "./interfaces";
+
 
 interface AppBuilder<S> {
   addApp(appProvider : ReaxApp<S>) : AppBuilder<S>;
-  addAppFunc(selector : Selector, func : SadFunc<S>) : AppBuilder<S>;
+  addAppFunc(selector : Selector, func : SADFunc<S>) : AppBuilder<S>;
+  addAsyncAppFunc(selector : Selector, async : AsyncSADFunc<S>) : AppBuilder<S>;
+  addStateRefinement(func : (S) => S) : AppBuilder<S>;
+  setInitialState<U extends S>(state : U) : AppBuilder<S>;
+  addActionSource(obs : Observable<Action>) : AppBuilder<S>;
+  build() : AppArtefacts<S>;
 }
 
 export default function appBuilder<S>() : AppBuilder<S> {
   const apps : Array<ReaxApp<S>> = [];
   const appFuncs : Array<AppFunc<S>> = [];
-  const asyncAppFuncs = [];
-  const stateSugar = [];
+  const asyncAppFuncs : Array<AsyncAppFunc<S>> = [];
+  const stateSugar : Array<(S) => S> = [];
   const actionObservables = [];
   let initialState = {};
 

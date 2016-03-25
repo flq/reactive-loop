@@ -1,5 +1,6 @@
 {
   "ambientDependencies": {
+    "es6-promise": "registry:dt/es6-promise#0.0.0+20160317120654",
     "lodash": "registry:dt/lodash#3.10.0+20160319050323",
     "rx": "npm:rx/ts/rx.all.d.ts"
   },
