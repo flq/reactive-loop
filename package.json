@@ -1,6 +1,6 @@
 {
   "name": "reax",
-  "version": "0.9.0",
+  "version": "0.8.0",
   "description": "A library supporting the definition of a reactive loop, similar to redux and with support for react",
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,8 @@
     "docs:clean": "rimraf _book",
     "docs:prepare": "gitbook install",
     "docs:build": "npm run docs:prepare && npm run docs:clean && gitbook build",
-    "docs:watch": "npm run docs:prepare && gitbook serve"
+    "docs:watch": "npm run docs:prepare && gitbook serve",
+    "docs:publish": "npm run docs:build && cd _book && git init && git commit --allow-empty -m 'Update docs' && git checkout -b gh-pages && git add . && git commit -am 'Update docs' && git push git@github.com:flq/reax gh-pages --force"
   },
   "author": "flq",
   "license": "MIT",
@@ -53,7 +54,7 @@
   "bugs": {
     "url": "https://github.com/flq/reax/issues"
   },
-  "homepage": "https://github.com/flq/reax",
+  "homepage": "http://realfiction.net/reax/",
   "npmName": "reax",
   "npmFileMap": [
     {
