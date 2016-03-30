@@ -1,0 +1,7 @@
+.babelrc
+.bookignore
+.npmignore
+.vscode
+book.json
+webpack.config.js
+wwwroot
