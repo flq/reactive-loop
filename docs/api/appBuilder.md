@@ -2,13 +2,13 @@
 
 # appBuilder
 
-    import {appBuilder} from 'reax';
+    import {appBuilder} from 'reactive-loop';
     const app = appBuilder()
         .addAppFunc('increment', (s, a) => ({ count: s().count + 1 }))
         .setInitialState({count: 0})
         .build();
 
-The appBuilder provides the entry point to reax. It helps you to set up your
+The appBuilder provides the entry point to reactive-loop. It helps you to set up your
 application. All things that you will call on the app builder (with the exception of _build_) will return the appBuilder object itself, in other words, you will typically have all calls chained.
 
 # addAppFunc(selector, func)

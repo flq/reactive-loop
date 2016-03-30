@@ -2,7 +2,7 @@
 
 The `ReaxConnector` is the _"host"_ of your application and must lie at the root of any React Component which want access to e.g. the `dispatch` function.
 
-    import {appBuilder, ReaxConnector} from 'reax';
+    import {appBuilder, ReaxConnector} from 'reactive-loop';
     const app = appBuilder()...build();
 
     ReactDom.render(

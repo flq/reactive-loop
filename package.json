@@ -1,8 +1,8 @@
 {
-  "name": "reax",
-  "version": "0.8.0",
-  "description": "A library supporting the definition of a reactive loop, similar to redux and with support for react",
-  "main": "index.js",
+  "name": "reactive-loop",
+  "version": "0.8.2",
+  "description": "A library supporting the definition of a reactive loop, similar to redux, including support for react",
+  "main": "lib/index.js",
   "scripts": {
     "test": "mocha",
     "build": "babel src --out-dir lib",
@@ -12,7 +12,7 @@
     "docs:prepare": "gitbook install",
     "docs:build": "npm run docs:prepare && npm run docs:clean && gitbook build",
     "docs:watch": "npm run docs:prepare && gitbook serve",
-    "docs:publish": "npm run docs:build && cd _book && git init && git commit --allow-empty -m 'Update docs' && git checkout -b gh-pages && git add . && git commit -am 'Update docs' && git push git@github.com:flq/reax gh-pages --force"
+    "docs:publish": "npm run docs:build && cd _book && git init && git commit --allow-empty -m 'Update docs' && git checkout -b gh-pages && git add . && git commit -am 'Update docs' && git push git@github.com:flq/reactive-loop gh-pages --force"
   },
   "author": "flq",
   "license": "MIT",
@@ -26,7 +26,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/flq/reax.git"
+    "url": "https://github.com/flq/reactive-loop.git"
   },
   "dependencies": {
     "lodash": "^4.6.1",
@@ -52,16 +52,7 @@
     "webpack-dev-server": "^1.14.1"
   },
   "bugs": {
-    "url": "https://github.com/flq/reax/issues"
+    "url": "https://github.com/flq/reactive-loop/issues"
   },
-  "homepage": "http://realfiction.net/reax/",
-  "npmName": "reax",
-  "npmFileMap": [
-    {
-      "basePath": "/lib/",
-      "files": [
-        "*.js"
-      ]
-    }
-  ]
+  "homepage": "http://realfiction.net/reactive-loop/"
 }

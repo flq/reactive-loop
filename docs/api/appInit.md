@@ -1,6 +1,6 @@
 # appInit
 
-    import {appBuilder, appInit} from 'reax';
+    import {appBuilder, appInit} from 'reactive-loop';
 
     var appArtefacts = appBuilder()...build();
     var appInterfaces = appInit(appArtefacts);

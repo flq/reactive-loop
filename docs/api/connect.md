@@ -5,7 +5,7 @@
 You use `connect` to make React components aware of the `dispatch` function, which allows to
 feed a new action into the reactive loop.
 
-    import {connect} from 'reax';
+    import {connect} from 'reactive-loop';
 
     const Button = connect(({id,label,dispatch}) => (
       <input 
