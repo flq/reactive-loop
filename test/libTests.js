@@ -1,5 +1,6 @@
 import * as Rx from 'rx';
 import {assert} from 'chai';
+import {assign as reaxAssign} from '../src/index'
 
 describe('obs tests', ()=> {
   it('have a way to feed back state', ()=> {
@@ -72,4 +73,19 @@ function actionSource() {
     actionObservable 
   };
 }
+
+describe('own assign', ()=> {
+  it('does create a new object', ()=> {
+    let obj = { val: "One" };
+    let obj2 = reaxAssign(obj, { valTwo: "Two" }, { ui: { sth: true } });
+    assert.deepEqual(obj2, {
+      val: "One",
+      valTwo: "Two",
+      ui: {
+        sth: true
+      }
+    });
+    assert.notStrictEqual(obj, obj2);
+  });
+});
 
