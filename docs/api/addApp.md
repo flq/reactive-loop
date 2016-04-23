@@ -22,6 +22,36 @@ as app funcs, async app funcs or state refinements based on the following rules:
 * If the function starts with either **refine** or **monitor** it will be treated as a state refinement.
 * If the function starts with **dispatch** its return value will be treated as an observable of actions.
 
+## Mounting into a subspace of the state object
+
+If you intend to run multiple instances of the same app, it will be useful to specify a mount point
+for your app. This means that all app funcs of said app will receive the property specified 
+as mount point from the state object, and will also only be able to update the object 
+accessible through that property on the state object.
+
+    function app(mount) {
+      return (ctx) => {
+        return {
+          mount() { return mount; }
+          ...
+        }
+      };
+    }
+    
+    const app = appBuilder()
+      .addApp(app('firstInstance'))
+      .addApp(app('secondInstance'))
+      .build();
+      
+    // Giving a state object like:
+    {
+      firstInstance: {},
+      secondInstance: {}
+    }
+
+reactive-loop ensures that the properties are initialized to empty objects if nothing has been
+provided by giving a fitting initial state.
+
 ## Sample 1
 
     function launchApp() {
