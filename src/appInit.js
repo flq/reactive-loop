@@ -2,11 +2,11 @@ import {Observable,Subject} from 'rx';
 import {
   concat, 
   each,
-  forOwn,
   isString, 
   isFunction, 
   map, 
   reduce} from 'lodash';
+import { adaptApps } from './appAdapter';
 
 export default function appInit(app) {
   
@@ -20,7 +20,7 @@ export default function appInit(app) {
     getState: ()=> currentState
   };
 
-  populateApp(app, destructureApps(app.apps, additionalContext));
+  populateApp(app, adaptApps(app.apps, additionalContext));
 
   const stateObservable = reduce(
      app.stateSugar,
@@ -131,32 +131,6 @@ function createAppFuncFilter(selector) {
   return (f => false); // This handler will never match with any action
 }
 
-function destructureApps(apps, context) {
-  const appFuncs = [];
-  const asyncAppFuncs = [];
-  const stateRefinements = [];
-  const actionObservables = [];
-  each(apps, a => {
-    if (!isFunction(a))
-      throw Error("You need to provide a function returning your application object when using 'addApp'.");
-    var appFuncsObj = a(context);
-    forOwn(appFuncsObj, (val, key) => {
-      var selector = getActionTypeFromFunctionName(key);
-      if (selector) {
-        if (key.endsWith("Async"))
-          asyncAppFuncs.push({ selector, async: val });
-        else
-          appFuncs.push({ selector, func: val });
-      }
-      if (key.startsWith('refine') || key.startsWith('monitor'))
-        stateRefinements.push(val);
-      if (key.startsWith('dispatch'))
-        actionObservables.push(val());
-    });
-  });
-  return {appFuncs, asyncAppFuncs, stateRefinements, actionObservables};
-}
-
 function populateApp(app, {appFuncs, asyncAppFuncs, stateRefinements, actionObservables}) {
   each(appFuncs, appFunc => app.appFuncs.push(appFunc));
   each(asyncAppFuncs, asyncFunc => app.asyncAppFuncs.push(asyncFunc));
@@ -164,13 +138,3 @@ function populateApp(app, {appFuncs, asyncAppFuncs, stateRefinements, actionObse
   each(actionObservables, obs => app.actionObservables.push(obs));
 }
 
-function getActionTypeFromFunctionName(methodName) {
-  if (!isString(methodName))
-    return undefined;
-  if (!methodName.startsWith("on"))
-    return methodName;
-  var actionName = methodName.substring(2);
-  if (actionName.endsWith("Async"))
-    actionName = actionName.substring(0, actionName.length - 5);
-  return actionName.charAt(0).toLowerCase() + actionName.substring(1);
-}

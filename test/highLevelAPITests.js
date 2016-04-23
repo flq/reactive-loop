@@ -4,6 +4,7 @@ import {assert} from 'chai';
 import {testRig, fooAct, countUp} from './_testSupport';
 
 describe('higher-level API', ()=> {
+
   it('supports adding app funcs (on...(s,a,d) : s)', ()=> {
     var appFuncs = ()=> ({ 
       onFoo(s) { return { count: s().count + 1 } } 
@@ -56,5 +57,21 @@ describe('higher-level API', ()=> {
       cb();
     });
     dispatchAction(fooAct);
+  });
+  
+  it('supports specifying a mount point for an app', ()=> {
+    var app = ()=> ({
+      mount() { return 'app'; },
+      onFoo(s) {
+          if (s().val)
+            throw "I should not see this";
+          return { myval: 'hi' }; 
+      } 
+    });
+    
+    let {getState} = testRig(b => b.addApp(app).setInitialState({ val: 'hello' }));
+    var newState = getState({ type: 'foo' });
+    assert.deepEqual(newState, { val: 'hello', app: { myval: 'hi' } });
+    
   });
 });
