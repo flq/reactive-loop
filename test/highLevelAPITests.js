@@ -69,7 +69,7 @@ describe('higher-level API', ()=> {
       } 
     });
     
-    let {getState} = testRig(b => b.addApp(app).setInitialState({ val: 'hello' }));
+    let {getState} = testRig(b => b.addApp(app), { val: 'hello' });
     var newState = getState({ type: 'foo' });
     assert.deepEqual(newState, { val: 'hello', app: { myval: 'hi' } });
     
