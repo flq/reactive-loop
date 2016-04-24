@@ -16,7 +16,7 @@ export function adaptApps(apps, context) {
     var appFuncsObj = a(context);
     const funcWrappers = createFuncWrappers(appFuncsObj.mount, stateRefinements);
     forOwn(appFuncsObj, (val, key) => {
-      var selector = getActionTypeFromFunctionName(key);
+      var selector = getSelector(key, appFuncsObj);
       if (selector) {
         if (key.endsWith("Async"))
           asyncAppFuncs.push({ selector, async: val });
@@ -32,7 +32,7 @@ export function adaptApps(apps, context) {
   return {appFuncs, asyncAppFuncs, stateRefinements, actionObservables};
 }
 
-function getActionTypeFromFunctionName(methodName) {
+function getSelector(methodName, appObject) {
   if (!isString(methodName))
     return undefined;
   if (!methodName.startsWith("on"))
@@ -40,6 +40,8 @@ function getActionTypeFromFunctionName(methodName) {
   var actionName = methodName.substring(2);
   if (actionName.endsWith("Async"))
     actionName = actionName.substring(0, actionName.length - 5);
+  if (appObject[`filterFor${actionName}`])
+    return appObject[`filterFor${actionName}`];
   return actionName.charAt(0).toLowerCase() + actionName.substring(1);
 }
 

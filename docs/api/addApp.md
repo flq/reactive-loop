@@ -19,6 +19,7 @@ as app funcs, async app funcs or state refinements based on the following rules:
 
 * A method starting with **"on"** will become an appFunc, with the remaining name of the method used to match with the type of actions (e.g. onLaunch becomes an app func which will listen to action's of type = 'launch')
 * If such a method ends on the word **"Async"** it will be considered as async app func (i.e. an app func that returns a Promise for a new state)
+* If there is a method that starts with **"filterFor"**, it will be used as [selector](appBuilder.md#addappfuncselector-func) for a method that runs by the same word. E.g. **onLaunchRocket** + **filterForLaunchRocket**
 * If the function starts with either **refine** or **monitor** it will be treated as a state refinement.
 * If the function starts with **dispatch** its return value will be treated as an observable of actions.
 
@@ -58,6 +59,8 @@ provided by giving a fitting initial state.
       return {
         onInitLaunch(s,a,d) { /* app func for action.type == 'initLaunch' */ },
         onResetCounterAsync(s,a,d) { /* async app func for action.type == 'resetCounter' */ },
+        filterForNewWeatherData(a) { return a.type.startsWith("weather/"); },
+        onNewWeatherData(s,a,d) { /* gets called when the filter allows it */ },
         refineUi(s) { /* A state refinement */ },
       }
     }

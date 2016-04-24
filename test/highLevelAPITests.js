@@ -74,4 +74,22 @@ describe('higher-level API', ()=> {
     assert.deepEqual(newState, { val: 'hello', app: { myval: 'hi' } });
     
   });
+  
+  it('supports specifying a filter for an app func', ()=> {
+    var app = ()=> ({
+      filterForReaction(a) {
+        return a.type.startsWith('f');
+      },
+      onReaction(s) {
+        return { count: s().count + 1 }; 
+      } 
+    });
+    
+    let {getCount} = testRig(b => b.addApp(app));
+    assert.equal(1, getCount({type: 'reaction'}));
+    assert.equal(2, getCount({type: 'f1'}));
+    assert.equal(3, getCount({type: 'f2'}));
+    
+  });
+  
 });
