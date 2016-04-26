@@ -19,12 +19,12 @@ export function adaptApps(apps, context) {
       var selector = getSelector(key, appFuncsObj);
       if (selector) {
         if (key.endsWith("Async"))
-          asyncAppFuncs.push({ selector, async: val });
+          asyncAppFuncs.push({ selector, async: funcWrappers.asyncAppFunc(val) });
         else
           appFuncs.push({ selector, func: funcWrappers.appFunc(val) });
       }
       if (key.startsWith('refine') || key.startsWith('monitor'))
-        stateRefinements.push(val);
+        stateRefinements.push(funcWrappers.stateRefine(val));
       if (key.startsWith('dispatch'))
         actionObservables.push(val());
     });
@@ -62,7 +62,7 @@ function createFuncWrappers(mountFunc, stateRefinements) {
      return;
     s[mountPoint] = {};
     return s;
-  })
+  });
   
   return {
     appFunc(f) {
@@ -72,6 +72,24 @@ function createFuncWrappers(mountFunc, stateRefinements) {
         subState[mountPoint] = f(newSFunc,a,d);
         return assign({}, s(), subState);
       };
+    },
+    asyncAppFunc(f) {
+      return (s,a,d) => {
+        const newSFunc = () => s()[mountPoint];
+        const subState = {};
+        return f(newSFunc,a,d).then(newState => {
+          subState[mountPoint] = newState;
+          return assign({}, s(), subState);  
+        });
+      };
+    },
+    stateRefine(f) {
+      return (s) => {
+        const subState = {};
+        const newState = f(s[mountPoint]);
+        subState[mountPoint] = newState;
+        return assign(s, subState);
+      }
     }
   }
 }

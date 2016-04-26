@@ -1,6 +1,7 @@
 import {Observable} from 'rx';
 import {appInit,appBuilder} from '../src/index';
 import {assert} from 'chai';
+import {assign} from 'lodash';
 import {testRig, fooAct, countUp} from './_testSupport';
 
 describe('higher-level API', ()=> {
@@ -59,12 +60,12 @@ describe('higher-level API', ()=> {
     dispatchAction(fooAct);
   });
   
-  it('supports specifying a mount point for an app', ()=> {
+  it('supports applying a mount point - sync app func', ()=> {
     var app = ()=> ({
       mount() { return 'app'; },
       onFoo(s) {
           if (s().val)
-            throw "I should not see this";
+            return;
           return { myval: 'hi' }; 
       } 
     });
@@ -72,7 +73,39 @@ describe('higher-level API', ()=> {
     let {getState} = testRig(b => b.addApp(app), { val: 'hello' });
     var newState = getState({ type: 'foo' });
     assert.deepEqual(newState, { val: 'hello', app: { myval: 'hi' } });
+  });
+  
+  it('supports applying a mount point - state refinement', ()=> {
+    var app = ()=> ({
+      mount() { return 'app'; },
+      onFoo: countUp,
+      refineState(s) {
+        if (s.val) return;
+        return assign(s, { refined: true }); 
+      }
+    });
     
+    let {getState} = testRig(b => b.addApp(app), { val: 1, app: { count: 1 } });
+    assert.deepEqual(getState({ type: 'foo'}), { val: 1, app: { count: 2, refined: true } });
+    
+  });
+  
+  it('supports applying a mount point - async app func', (cb)=> {
+    var app = ()=> ({
+      mount() { return 'app'; },
+      onFooAsync(s) {
+        var valToResolve = s().val ? {} : { myval: '2' };
+        return Promise.resolve(valToResolve); 
+      }
+    });
+    
+    let {dispatchAction,stateObservable} = testRig(b => b.addApp(app), { val: '1' });
+    
+    stateObservable.subscribe(s => {
+      assert.deepEqual(s, { val: '1', app: { myval: '2' } });
+      cb();
+    });
+    dispatchAction(fooAct);
   });
   
   it('supports specifying a filter for an app func', ()=> {
@@ -82,7 +115,7 @@ describe('higher-level API', ()=> {
       },
       onReaction(s) {
         return { count: s().count + 1 }; 
-      } 
+      }
     });
     
     let {getCount} = testRig(b => b.addApp(app));
