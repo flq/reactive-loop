@@ -1,0 +1,365 @@
+<!DOCTYPE HTML>
+<html lang="en" >
+    
+    <head>
+        
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <title>App Builder.Add App | An rxjs-based reactive loop and a link to React</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 2.5.2">
+        
+        
+        <meta name="HandheldFriendly" content="true"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+        <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+        
+    <link rel="stylesheet" href="../../gitbook/style.css">
+    
+        
+        <link rel="stylesheet" href="../../gitbook/plugins/gitbook-plugin-highlight/website.css">
+        
+    
+        
+        <link rel="stylesheet" href="../../gitbook/plugins/gitbook-plugin-search/search.css">
+        
+    
+        
+        <link rel="stylesheet" href="../../gitbook/plugins/gitbook-plugin-fontsettings/website.css">
+        
+    
+    
+
+        
+    
+    
+    <link rel="next" href="../../docs/api/appInit.html" />
+    
+    
+    <link rel="prev" href="../../docs/api/appBuilder.html" />
+    
+
+        
+    </head>
+    <body>
+        
+        
+    <div class="book" data-level="2.2" data-chapter-title="App Builder.Add App" data-filepath="docs/api/addApp.md" data-basepath="../.." data-revision="Wed Aug 10 2016 20:56:43 GMT+0200 (CEST)">
+    
+
+<div class="book-summary">
+    <nav role="navigation">
+        <ul class="summary">
+            
+            
+            
+            
+
+            
+
+            
+    
+        <li class="chapter " data-level="0" data-path="index.html">
+            
+                
+                    <a href="../../index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                        Introduction
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="1" data-path="docs/theory.html">
+            
+                
+                    <a href="../../docs/theory.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>1.</b>
+                        
+                        Theory
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="2" data-path="docs/api.html">
+            
+                
+                    <a href="../../docs/api.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.</b>
+                        
+                        API Reference
+                    </a>
+            
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1" data-path="docs/api/appBuilder.html">
+            
+                
+                    <a href="../../docs/api/appBuilder.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.1.</b>
+                        
+                        App Builder
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter active" data-level="2.2" data-path="docs/api/addApp.html">
+            
+                
+                    <a href="../../docs/api/addApp.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.2.</b>
+                        
+                        App Builder.Add App
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3" data-path="docs/api/appInit.html">
+            
+                
+                    <a href="../../docs/api/appInit.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.3.</b>
+                        
+                        App Init
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4" data-path="docs/api/connect.html">
+            
+                
+                    <a href="../../docs/api/connect.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.4.</b>
+                        
+                        connect
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5" data-path="docs/api/ReaxConnector.html">
+            
+                
+                    <a href="../../docs/api/ReaxConnector.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.5.</b>
+                        
+                        Reax Connector
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="2.6" data-path="docs/api/assign.html">
+            
+                
+                    <a href="../../docs/api/assign.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.6.</b>
+                        
+                        assign
+                    </a>
+            
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+
+            
+            <li class="divider"></li>
+            <li>
+                <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+                    Published with GitBook
+                </a>
+            </li>
+            
+        </ul>
+    </nav>
+</div>
+
+    <div class="book-body">
+        <div class="body-inner">
+            <div class="book-header" role="navigation">
+    <!-- Actions Left -->
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="../../" >An rxjs-based reactive loop and a link to React</a>
+    </h1>
+</div>
+
+            <div class="page-wrapper" tabindex="-1" role="main">
+                <div class="page-inner">
+                
+                
+                    <section class="normal" id="section-">
+                    
+                        <h1 id="addappfunc">addApp(func)</h1>
+<!-- toc -->
+<ul>
+<li><a href="#func">func</a></li>
+<li><a href="#mounting-into-a-subspace-of-the-state-object">Mounting into a subspace of the state object</a></li>
+<li><a href="#sample-1">Sample 1</a></li>
+<li><a href="#naive-undo-app">Naive Undo app</a></li>
+</ul>
+<!-- toc stop -->
+<h2 id="func">func</h2>
+<p>A function that is called with the following object:</p>
+<pre><code>{
+  dispatch // A function with which to dispatch actions
+  getState // A function that returns the current state
+}
+</code></pre><blockquote>
+<p>You probably don&apos;t need these very often since the app funcs you provide will also have access
+to those bits.</p>
+</blockquote>
+<p>Your function is expected to return an object with a number of methods on it. These will be added
+as app funcs, async app funcs or state refinements based on the following rules:</p>
+<ul>
+<li>A method starting with <strong>&quot;on&quot;</strong> will become an appFunc, with the remaining name of the method used to match with the type of actions (e.g. onLaunch becomes an app func which will listen to action&apos;s of type = &apos;launch&apos;)</li>
+<li>If such a method ends on the word <strong>&quot;Async&quot;</strong> it will be considered as async app func (i.e. an app func that returns a Promise for a new state)</li>
+<li>If there is a method that starts with <strong>&quot;filterFor&quot;</strong>, it will be used as <a href="appBuilder.html#addappfuncselector-func">selector</a> for a method that runs by the same word. E.g. <strong>onLaunchRocket</strong> + <strong>filterForLaunchRocket</strong></li>
+<li>If the function starts with either <strong>refine</strong> or <strong>monitor</strong> it will be treated as a state refinement.</li>
+<li>If the function starts with <strong>dispatch</strong> its return value will be treated as an observable of actions.</li>
+</ul>
+<h2 id="mounting-into-a-subspace-of-the-state-object">Mounting into a subspace of the state object</h2>
+<p>If you intend to run multiple instances of the same app, it will be useful to specify a mount point
+for your app. This means that all app funcs of said app will receive the property specified 
+as mount point from the state object, and will also only be able to update the object 
+accessible through that property on the state object.</p>
+<pre><code>function app(mount) {
+  return (ctx) =&gt; {
+    return {
+      mount() { return mount; }
+      ...
+    }
+  };
+}
+
+const app = appBuilder()
+  .addApp(app(&apos;firstInstance&apos;))
+  .addApp(app(&apos;secondInstance&apos;))
+  .build();
+
+// Giving a state object like:
+{
+  firstInstance: {},
+  secondInstance: {}
+}
+</code></pre><p>reactive-loop ensures that the properties are initialized to empty objects if nothing has been
+provided by giving a fitting initial state.</p>
+<h2 id="sample-1">Sample 1</h2>
+<pre><code>function launchApp() {
+  return {
+    onInitLaunch(s,a,d) { /* app func for action.type == &apos;initLaunch&apos; */ },
+    onResetCounterAsync(s,a,d) { /* async app func for action.type == &apos;resetCounter&apos; */ },
+    filterForNewWeatherData(a) { return a.type.startsWith(&quot;weather/&quot;); },
+    onNewWeatherData(s,a,d) { /* gets called when the filter allows it */ },
+    refineUi(s) { /* A state refinement */ },
+  }
+}
+const app = appBuilder().addApp(launchApp).build();
+</code></pre><h2 id="naive-undo-app">Naive Undo app</h2>
+<p>Here&apos;s another example, a naive undo app:</p>
+<pre><code>function undoApp() {
+  const stateStack = [];
+  return {
+    onUndo() {
+      stateStack.pop(); // current
+      var last = stateStack.pop();
+      return last;
+    },
+    monitorState(s) {
+      stateStack.push(s);
+    }
+  }
+}
+</code></pre>
+                    
+                    </section>
+                
+                
+                </div>
+            </div>
+        </div>
+
+        
+        <a href="../../docs/api/appBuilder.html" class="navigation navigation-prev " aria-label="Previous page: App Builder"><i class="fa fa-angle-left"></i></a>
+        
+        
+        <a href="../../docs/api/appInit.html" class="navigation navigation-next " aria-label="Next page: App Init"><i class="fa fa-angle-right"></i></a>
+        
+    </div>
+</div>
+
+        
+<script src="../../gitbook/app.js"></script>
+
+    
+    <script src="../../gitbook/plugins/gitbook-plugin-search/lunr.min.js"></script>
+    
+
+    
+    <script src="../../gitbook/plugins/gitbook-plugin-search/search.js"></script>
+    
+
+    
+    <script src="../../gitbook/plugins/gitbook-plugin-sharing/buttons.js"></script>
+    
+
+    
+    <script src="../../gitbook/plugins/gitbook-plugin-fontsettings/buttons.js"></script>
+    
+
+<script>
+require(["gitbook"], function(gitbook) {
+    var config = {"toc":{},"highlight":{},"search":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2}};
+    gitbook.start(config);
+});
+</script>
+
+        
+    </body>
+    
+</html>

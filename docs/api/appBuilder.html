@@ -1,0 +1,371 @@
+<!DOCTYPE HTML>
+<html lang="en" >
+    
+    <head>
+        
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <title>App Builder | An rxjs-based reactive loop and a link to React</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 2.5.2">
+        
+        
+        <meta name="HandheldFriendly" content="true"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+        <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+        
+    <link rel="stylesheet" href="../../gitbook/style.css">
+    
+        
+        <link rel="stylesheet" href="../../gitbook/plugins/gitbook-plugin-highlight/website.css">
+        
+    
+        
+        <link rel="stylesheet" href="../../gitbook/plugins/gitbook-plugin-search/search.css">
+        
+    
+        
+        <link rel="stylesheet" href="../../gitbook/plugins/gitbook-plugin-fontsettings/website.css">
+        
+    
+    
+
+        
+    
+    
+    <link rel="next" href="../../docs/api/addApp.html" />
+    
+    
+    <link rel="prev" href="../../docs/api.html" />
+    
+
+        
+    </head>
+    <body>
+        
+        
+    <div class="book" data-level="2.1" data-chapter-title="App Builder" data-filepath="docs/api/appBuilder.md" data-basepath="../.." data-revision="Wed Aug 10 2016 20:56:43 GMT+0200 (CEST)">
+    
+
+<div class="book-summary">
+    <nav role="navigation">
+        <ul class="summary">
+            
+            
+            
+            
+
+            
+
+            
+    
+        <li class="chapter " data-level="0" data-path="index.html">
+            
+                
+                    <a href="../../index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                        Introduction
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="1" data-path="docs/theory.html">
+            
+                
+                    <a href="../../docs/theory.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>1.</b>
+                        
+                        Theory
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="2" data-path="docs/api.html">
+            
+                
+                    <a href="../../docs/api.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.</b>
+                        
+                        API Reference
+                    </a>
+            
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter active" data-level="2.1" data-path="docs/api/appBuilder.html">
+            
+                
+                    <a href="../../docs/api/appBuilder.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.1.</b>
+                        
+                        App Builder
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="docs/api/addApp.html">
+            
+                
+                    <a href="../../docs/api/addApp.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.2.</b>
+                        
+                        App Builder.Add App
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3" data-path="docs/api/appInit.html">
+            
+                
+                    <a href="../../docs/api/appInit.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.3.</b>
+                        
+                        App Init
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4" data-path="docs/api/connect.html">
+            
+                
+                    <a href="../../docs/api/connect.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.4.</b>
+                        
+                        connect
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5" data-path="docs/api/ReaxConnector.html">
+            
+                
+                    <a href="../../docs/api/ReaxConnector.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.5.</b>
+                        
+                        Reax Connector
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="2.6" data-path="docs/api/assign.html">
+            
+                
+                    <a href="../../docs/api/assign.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.6.</b>
+                        
+                        assign
+                    </a>
+            
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+
+            
+            <li class="divider"></li>
+            <li>
+                <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+                    Published with GitBook
+                </a>
+            </li>
+            
+        </ul>
+    </nav>
+</div>
+
+    <div class="book-body">
+        <div class="body-inner">
+            <div class="book-header" role="navigation">
+    <!-- Actions Left -->
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="../../" >An rxjs-based reactive loop and a link to React</a>
+    </h1>
+</div>
+
+            <div class="page-wrapper" tabindex="-1" role="main">
+                <div class="page-inner">
+                
+                
+                    <section class="normal" id="section-">
+                    
+                        <!-- toc -->
+<ul>
+<li><a href="#appbuilder">appBuilder</a></li>
+<li><a href="#addappfuncselector-func">addAppFunc(selector, func)</a><ul>
+<li><a href="#selector">selector</a></li>
+<li><a href="#func">func</a></li>
+</ul>
+</li>
+<li><a href="#addasyncappfuncselector-func">addAsyncAppFunc(selector, func)</a></li>
+<li><a href="#addactionsourceobservable">addActionSource(observable)</a></li>
+<li><a href="#adderrorlistenerfunc">addErrorListener(func)</a><ul>
+<li><a href="#func">func</a></li>
+</ul>
+</li>
+<li><a href="#addstaterefinementfunc">addStateRefinement(func)</a><ul>
+<li><a href="#func">func</a></li>
+</ul>
+</li>
+<li><a href="#setinitialstateobject">setInitialState(object)</a></li>
+<li><a href="#addappfunction">addApp(function)</a></li>
+<li><a href="#build">build()</a></li>
+</ul>
+<!-- toc stop -->
+<h1 id="appbuilder">appBuilder</h1>
+<pre><code>import {appBuilder} from &apos;reactive-loop&apos;;
+const app = appBuilder()
+    .addAppFunc(&apos;increment&apos;, (s, a) =&gt; ({ count: s().count + 1 }))
+    .setInitialState({count: 0})
+    .build();
+</code></pre><p>The appBuilder provides the entry point to reactive-loop. It helps you to set up your
+application. All things that you will call on the app builder (with the exception of <em>build</em>) will return the appBuilder object itself, in other words, you will typically have all calls chained.</p>
+<h1 id="addappfuncselector-func">addAppFunc(selector, func)</h1>
+<blockquote>
+<p>Provide an application function to participate in the reactive loop.</p>
+</blockquote>
+<h2 id="selector">selector</h2>
+<p>Either </p>
+<ul>
+<li>a <code>string</code> which will then define on which type of dispatched action the func should listen to</li>
+<li>or a <code>function</code> that takes an action as an input and returns true/false to define whether the func should be called with this particular action or not.</li>
+</ul>
+<h2 id="func">func</h2>
+<p>A function with the following input:</p>
+<ul>
+<li>A function that, when called, returns the current state object.</li>
+<li>The action that initiated the call</li>
+<li>If the dispatch method is required, it will be available as the third argument.</li>
+</ul>
+<p>Put it all together and you get SAD, which may help you to remember this ;)</p>
+<p>The <strong>return</strong> value of the function must be the new application state. You will typically use
+<code>assign</code> to join your state updates with the currently available state.
+If you return undefined, the result will be ignored. This allows you to react to an action and produce side effects unrelated to the UI.</p>
+<h1 id="addasyncappfuncselector-func">addAsyncAppFunc(selector, func)</h1>
+<p>All documentation to <code>addAppFunc</code> applies to this method, with the notable difference that your function must return a Promise which will resolve to the new state.</p>
+<h1 id="addactionsourceobservable">addActionSource(observable)</h1>
+<p>This method allows you to feed in an Observable that will produce actions that will be dispatched into your application. A typical use case would involve a periodic action like some kind of timer, or input from other subsystems like e.g. a back channel from your server.</p>
+<h1 id="adderrorlistenerfunc">addErrorListener(func)</h1>
+<p>Reax works with Observables internally. Exceptions that occur while dealing with observables essentially kill that particular observable. Hence all app funcs will be wrapped such that when they throw an exception, that exception will be made available to the system in the form of a special action.</p>
+<h2 id="func">func</h2>
+<p>Input:</p>
+<ul>
+<li>s : A function that, when called, provides the current state</li>
+<li>a : The error action</li>
+</ul>
+<p>Ouput: none is required</p>
+<p>The error action has this shape:</p>
+<pre><code>{
+  type: &apos;error&apos;
+  whileHandling: { action that was provided to the app func causing the exception }
+  error: { the exception thrown }
+}
+</code></pre><h1 id="addstaterefinementfunc">addStateRefinement(func)</h1>
+<p>The functions you provide here are allowed to access only the current state and may modify it by returning a new state. These functions are called every time a state transition occurs. You can use
+it to e.g. separate concerns with regard to state modifications.</p>
+<h2 id="func">func</h2>
+<p>A function that takes a single input, namely the state and returns a modified version of the state</p>
+<blockquote>
+<p>Please note that this type of function will receive the state object itself, <strong>NOT</strong> a function
+returning the state.</p>
+</blockquote>
+<h1 id="setinitialstateobject">setInitialState(object)</h1>
+<p>Sets the initial state with which the reactive loop is kicked off. If you don&apos;t set it, the loop will be kicked off with an empty object ({}).</p>
+<h1 id="addappfunction">addApp(function)</h1>
+<p>Allows you to add app funcs and similar items by convention as well as providing an extension point for modularized application fragments (e.g. an Undo Stack). See <a href="addApp.html">AppBuilder.AddApp</a></p>
+<h1 id="build">build()</h1>
+<p>Finalizes the application building and returns an object which should typically be used as input to the <code>appInit</code> function.</p>
+
+                    
+                    </section>
+                
+                
+                </div>
+            </div>
+        </div>
+
+        
+        <a href="../../docs/api.html" class="navigation navigation-prev " aria-label="Previous page: API Reference"><i class="fa fa-angle-left"></i></a>
+        
+        
+        <a href="../../docs/api/addApp.html" class="navigation navigation-next " aria-label="Next page: App Builder.Add App"><i class="fa fa-angle-right"></i></a>
+        
+    </div>
+</div>
+
+        
+<script src="../../gitbook/app.js"></script>
+
+    
+    <script src="../../gitbook/plugins/gitbook-plugin-search/lunr.min.js"></script>
+    
+
+    
+    <script src="../../gitbook/plugins/gitbook-plugin-search/search.js"></script>
+    
+
+    
+    <script src="../../gitbook/plugins/gitbook-plugin-sharing/buttons.js"></script>
+    
+
+    
+    <script src="../../gitbook/plugins/gitbook-plugin-fontsettings/buttons.js"></script>
+    
+
+<script>
+require(["gitbook"], function(gitbook) {
+    var config = {"toc":{},"highlight":{},"search":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2}};
+    gitbook.start(config);
+});
+</script>
+
+        
+    </body>
+    
+</html>
