@@ -1,6 +1,4 @@
-import React from 'react';
-const { Component, PropTypes, Children } = React;
-
+import React, { Component, PropTypes, Children } from 'react';
 import appInit from './appInit';
 
 export class ReaxConnector extends Component {
@@ -27,7 +25,7 @@ export class ReaxConnector extends Component {
   }
 
   render() {
-    return React.createElement("div",{}, this.props.children);
+    return Children.only(this.props.children);
   }
 }
 

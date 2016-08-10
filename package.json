@@ -1,6 +1,6 @@
 {
   "name": "reactive-loop",
-  "version": "0.8.5",
+  "version": "0.9.0",
   "description": "A library supporting the definition of a reactive loop, similar to redux, including support for react",
   "main": "lib/index.js",
   "scripts": {

@@ -41,9 +41,11 @@ global.App = {
 
     ReactDom.render(
       <ReaxConnector app={ app }>
-        <Button id="sproink" label="Cause a hubbub" />
-        <Button id="undo" label="Undo" />
-        <HelloWorld />
+        <div>
+          <Button id="sproink" label="Cause a hubbub" />
+          <Button id="undo" label="Undo" />
+          <HelloWorld />
+        </div>
       </ReaxConnector>, renderTarget);
   }
 }
